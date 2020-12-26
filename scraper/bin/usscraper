@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+
+# usscraper - main scraper script.
+
+# Reset bash elapsed time since starting.
+SECONDS=0
+
+# Source libraries.
+source /usr/local/lib/usscraper.sh || exit 1
+source /usr/local/lib/moodle.sh || exit 1
+
+# Set the master log file.
+LOG_FILE="/var/usscraper/logs/$(date "+%Y_%m_%d").log"; export LOG_FILE
+
+function main() {
+    log_put "${LOG_INFO}" "Hello, this is usscraper."
+
+    # Export essential environment variables from the configuration file.
+    # The username, password and service are not exported unless we need to get an API token.
+    log_put "${LOG_DEBUG}" "Exporting environment variable." "MOODLE_BASEURL"
+    MOODLE_BASEURL="$(${CONFIG_GET} moodle_baseurl)"; export MOODLE_BASEURL
+
+    # If there is an api token in the cache, export it. Otherwise, get an api token, cache it and
+    # export it.
+    MOODLE_API_TOKEN="$(${CACHE_GET} moodle_api_token)"
+    if [[ -z "${MOODLE_API_TOKEN}" ]]; then
+        log_put "${LOG_NOTICE}" "Moodle API token not found in cache, attempting to acquire it."
+
+        log_put "${LOG_DEBUG}" "Exporting environment variable from configuration." "MOODLE_USERNAME"
+        MOODLE_USERNAME="$(${CONFIG_GET} moodle_username)"; export MOODLE_USERNAME
+        log_put "${LOG_DEBUG}" "Exporting environment variable from configuration." "MOODLE_PASSWORD"
+        MOODLE_PASSWORD="$(${CONFIG_GET} moodle_password)"; export MOODLE_PASSWORD
+        log_put "${LOG_DEBUG}" "Exporting environment variable from configuration." "MOODLE_SERVICE_NAME"
+        MOODLE_SERVICE_NAME="$(${CONFIG_GET} moodle_service_name)"; export MOODLE_SERVICE_NAME
+
+        log_put "${LOG_DEBUG}" "Sending login request."
+        local token
+        token="$(moodle_login)"
+
+        log_put "${LOG_DEBUG}" "Unsetting sensitive environment variables."
+        unset MOODLE_USERNAME
+        unset MOODLE_PASSWORD
+        unset MOODLE_SERVICE_NAME
+
+        if [[ -z "${token}" ]]; then
+            log_put "${LOG_CRITICAL}" "Failed to acquire the token."
+            exit 1
+        else
+            ${CACHE_SET} moodle_api_token "${token}"
+            MOODLE_API_TOKEN="${token}"
+            log_put "${LOG_NOTICE}" "Token acquired and stored in cache."
+        fi
+    fi
+    log_put "${LOG_DEBUG}" "Exporting environment variable." "MOODLE_API_TOKEN"
+    export MOODLE_API_TOKEN
+
+    # Check if the user id is cached and acquire it if it's not cached.
+    local moodle_userid
+    moodle_userid="$(${CACHE_GET} moodle_userid)"
+    if [[ -z "${moodle_userid}" ]]; then
+        log_put "${LOG_NOTICE}" "Moodle user id not found in cache, attempting to acquire it."
+
+        moodle_userid="$(moodle_do core_webservice_get_site_info | jq .userid)"
+
+        if [[ -z "${moodle_userid}" ]]; then
+            log_put "${LOG_CRITICAL}" "Failed to acquire the user id."
+            exit 1
+        else
+            ${CACHE_SET} moodle_userid "${moodle_userid}"
+            log_put "${LOG_NOTICE}" "User id acquired and stored in cache."
+        fi
+    fi
+
+    log_put "${LOG_INFO}" "Running scrapes."
+
+    for scrape_rule in /var/usscraper/rules/*; do
+        usscraper_runner "${scrape_rule}" &
+    done
+    wait
+
+    log_put "${LOG_NOTICE}" "usscraper ran for ${SECONDS} seconds."
+    log_put "${LOG_INFO}" "Goodbye."
+}
+
+main $@

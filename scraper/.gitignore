@@ -1,0 +1,3 @@
+# Ignore the data directory thay may be used for local development.
+data/*
+!data/.gitkeep

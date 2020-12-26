@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+# Sample usscraper rule.
+
+export MOODLE_FUNCTION_NAME="example_function_name"
+
+export MOODLE_FUNCTION_PARAMS=(
+    "userid=$(${CACHE_GET} moodle_userid)"
+    "courseid=$(${CACHE_GET} maths_courseid)"
+)
+
+export PROCESSING_CHAIN="jq ."

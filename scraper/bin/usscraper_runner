@@ -1,0 +1,123 @@
+#!/usr/bin/env bash
+
+# usscraper_runner - script for running each scrape.
+
+source /usr/local/lib/usscraper.sh || exit 1
+source /usr/local/lib/moodle.sh || exit 1
+
+# Get the contents of the data file of a scrape rule.
+function datafile_get() {
+    local scrape_rule
+    scrape_rule="${1}"; shift
+    printf "%s" "$(cat "/var/usscraper/data/${scrape_rule}/data.json")"
+}
+
+# Set the contents of the data file of a scrape rule.
+function datafile_set() {
+    local scrape_rule
+    scrape_rule="${1}"; shift
+    local data
+    data="${1}"; shift
+    printf "%s" "${data}" \
+        | tee "/var/usscraper/data/${scrape_rule}/data.json" 1> /dev/null
+}
+
+# Get the shasum of a scrape rule data file.
+function shasums_get() {
+    local scrape_rule
+    scrape_rule="${1}"; shift
+    printf "%s" "$(cat "/var/usscraper/data/${scrape_rule}/sha256sums.txt")"
+}
+
+# Set the shasum of the scrape rule data file.
+function shasums_set() {
+    local scrape_rule
+    scrape_rule="${1}"; shift
+    local shasum
+    shasum="${1}"; shift
+    printf "%s" "${shasum}" \
+        | tee "/var/usscraper/data/${scrape_rule}/sha256sums.txt" 1> /dev/null
+}
+
+# Compute a sha256sum from stdin.
+function shasums_compute() {
+    printf "%s" "$(cat - | shasum -a 256 | cut -d ' ' -f 1)"
+}
+
+function main() {
+    local scrape_rule
+    scrape_rule="${1}"; shift
+    scrape_rule="$(basename "${scrape_rule}")"
+
+    # Load the scrape rule.
+    log_put "${LOG_DEBUG}" "Loading scrape rule." "${scrape_rule}"
+    source "/var/usscraper/rules/${scrape_rule}" || exit 1
+
+    # Make sure there is a data directory for this scrape rule, a data file and a shasum file.
+    log_put "${LOG_DEBUG}" "Checking if data directory exists." "${scrape_rule}"
+    if [[ ! -d "/var/usscraper/data/${scrape_rule}" ]]; then
+        mkdir -p "/var/usscraper/data/${scrape_rule}"
+        log_put "${LOG_DEBUG}" "Created directory." "${scrape_rule}" "/var/usscraper/data/${scrape_rule}"
+
+        datafile_set "${scrape_rule}" ""
+        log_put "${LOG_DEBUG}" "Created file." "${scrape_rule}" "/var/usscraper/data/${scrape_rule}/data.json"
+
+        shasums_set "${scrape_rule}" "$(datafile_get "${scrape_rule}" | shasums_compute)"
+        log_put "${LOG_DEBUG}" "Initialized data file sha256sums." "${scrape_rule}" "$(shasums_get "${scrape_rule}")"
+
+        log_put "${LOG_NOTICE}" "Data directory and files created." "${scrape_rule}"
+    fi
+
+    # Send the request to Moodle.
+    log_put "${LOG_DEBUG}" "Sending request." "${scrape_rule}"
+    local resp
+    resp="$(moodle_do "${MOODLE_FUNCTION_NAME}" "${MOODLE_FUNCTION_PARAMS}")"
+
+    # If the response is empty, just return.
+    if [[ -z "${resp}" ]]; then
+        log_put "${LOG_WARN}" "Empty response." "${scrape_rule}"
+        return
+    else
+        log_put "${LOG_INFO}" "Received response." "${scrape_rule}"
+    fi
+
+    # Run the processing chain.
+    log_put "${LOG_DEBUG}" "Processing chain: ${PROCESSING_CHAIN}" "${scrape_rule}"
+    local processed_data
+    local stderr_tmpfile
+    stderr_tmpfile="$(mktemp -t scrape-"${scrape_rule}".XXXXXXXXXX)" || {
+        log_put "${LOG_CRITICAL}" "Could not create temporary file for capturing the stderr of the processing chain" "${scrape_rule}"
+        exit 1
+    }
+    processed_data="$(printf "%s" "${resp}" | bash -c "${PROCESSING_CHAIN}" -- 2> "${stderr_tmpfile}")"
+    local processing_chain_exitcode="$?"
+
+    # Check if the processing chain failed.
+    if [[ "${processing_chain_exitcode}" != "0" ]]; then
+        log_put "${LOG_ERROR}" "Processing chain exited with non-zero exit code. stderr: $(cat "${stderr_tmpfile}")" \
+            "${scrape_rule}" "exitcode=${processing_chain_exitcode}"
+        rm "${stderr_tmpfile}"
+        return
+    else
+        log_put "${LOG_INFO}" "Processing chain finished ok." "${scrape_rule}"
+    fi
+
+    # Compare shasums and overwrite data file if shasums are different.
+    local shasum_old
+    shasum_old="$(shasums_get "${scrape_rule}")"
+    local shasum_new
+    shasum_new="$(printf "%s" "${processed_data}" | shasums_compute)"
+    log_put "${LOG_DEBUG}" "Shasums." "${scrape_rule}" "old=${shasum_old} new=${shasum_new}"
+
+    if [[ "${shasum_new}" != "${shasum_old}" ]]; then
+        log_put "${LOG_NOTICE}" "New sha256sum is different from old sha256sum." \
+            "${scrape_rule}" "old=${shasum_old} new=${shasum_new}"
+
+        datafile_set "${scrape_rule}" "${processed_data}"
+        shasums_set "${scrape_rule}" "${shasum_new}"
+    else
+        log_put "${LOG_INFO}" "Old data is identical to new data." "${scrape_rule}"
+    fi
+}
+
+main $@

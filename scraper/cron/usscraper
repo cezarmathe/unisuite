@@ -1,0 +1,7 @@
+# usscraper crontab
+SHELL=/bin/bash
+
+# min   hour    day     month   weekday command
+*/1     *       *       *       *       /usr/local/bin/usscraper
+# 1> /var/usscraper/logs/master.stdout.log 2> /var/usscraper/logs/master.stderr.log
+# 2>&1

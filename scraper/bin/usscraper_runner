@@ -82,14 +82,14 @@ function main() {
     fi
 
     # Run the processing chain.
-    log_put "${LOG_DEBUG}" "Processing chain: ${PROCESSING_CHAIN}" "${scrape_rule}"
+    # log_put "${LOG_DEBUG}" "Processing chain: ${PROCESSING_CHAIN}" "${scrape_rule}"
     local processed_data
     local stderr_tmpfile
     stderr_tmpfile="$(mktemp -t scrape-"${scrape_rule}".XXXXXXXXXX)" || {
         log_put "${LOG_CRITICAL}" "Could not create temporary file for capturing the stderr of the processing chain" "${scrape_rule}"
         exit 1
     }
-    processed_data="$(printf "%s" "${resp}" | bash -c "${PROCESSING_CHAIN}" -- 2> "${stderr_tmpfile}")"
+    processed_data="$(printf "%s" "${resp}" | run_processing_chain 2> "${stderr_tmpfile}")"
     local processing_chain_exitcode="$?"
 
     # Check if the processing chain failed.

@@ -47,11 +47,11 @@ function shasums_compute() {
 function main() {
     local scrape_rule
     scrape_rule="${1}"; shift
-    scrape_rule="$(basename "${scrape_rule}")"
+    scrape_rule="$(basename "${scrape_rule}" .rule)"
 
     # Load the scrape rule.
     log_put "${LOG_DEBUG}" "Loading scrape rule." "${scrape_rule}"
-    source "/var/usscraper/rules/${scrape_rule}" || exit 1
+    source "/var/usscraper/rules/${scrape_rule}.rule" 1>/dev/null 2>&1|| exit 1
 
     # Make sure there is a data directory for this scrape rule, a data file and a shasum file.
     log_put "${LOG_DEBUG}" "Checking if data directory exists." "${scrape_rule}"

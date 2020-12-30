@@ -16,8 +16,12 @@ RUN mkdir -p /var/usscraper && \
         mkdir -p /var/usscraper/rules && \
         touch /var/usscraper/cache
 
+# Default usscraper user and group ids.
+ARG UID=1000
+ARG GID=1000
+
 # Create usscraper user.
-RUN addgroup -S usscraper && adduser -h /var/usscraper -s /bin/bash -S -G usscraper usscraper
+RUN addgroup --gid ${GID} -S usscraper && adduser --uid ${UID} -h /var/usscraper -s /bin/bash -S -G usscraper usscraper
 
 # Copy binaries.
 COPY ./bin/usscraper /usr/local/bin/usscraper

@@ -10,7 +10,7 @@ build:
 .PHONY: build
 
 push:
-    docker push "$(DOCKER_TAG):$(VERSION)"
+	docker push "$(DOCKER_TAG):$(VERSION)"
 .PHONY: push
 
 run:
@@ -21,6 +21,7 @@ run:
 		--tty \
 		--volume "$(shell pwd)/data:/var/usscraper" \
 		"$(DOCKER_TAG):$(VERSION)"
+.PHONY: run
 
 run-shell:
 	docker run \
@@ -32,3 +33,4 @@ run-shell:
 		--tty \
 		--volume "$(shell pwd)/data:/var/usscraper" \
 		"$(DOCKER_TAG):$(VERSION)"
+.PHONY: run-shell

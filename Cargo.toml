@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "asbot",
+    "uslib",
+    "watchman",
+]

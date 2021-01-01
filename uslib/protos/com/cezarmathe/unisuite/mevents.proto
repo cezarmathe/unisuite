@@ -1,0 +1,17 @@
+// mevents - Moodle events.
+
+syntax = "proto3";
+
+package com.cezarmathe.unisuite;
+
+// Information about the notification that should be pushed.
+message NotifyRequest {}
+
+// Response that acknowledges the outcome of the notification operation.
+message NotifyResponse {}
+
+// Moodle events service.
+service MoodleEvents {
+    // Notify that a change was detected on Moodle.
+    rpc Notify (NotifyRequest) returns (NotifyResponse);
+}

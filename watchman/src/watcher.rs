@@ -1,5 +1,7 @@
 //! File watcher.
 
+use std::path::PathBuf;
+
 use actix::prelude::*;
 
 use hotwatch::{Hotwatch, Event};
@@ -42,9 +44,15 @@ impl Actor for WatcherActor {
         };
 
         // watch all rules
-        for rule in self.rules.as_slice() {
-            // fixme 02/01/2021: proper path derived from rule
-            self.hw.watch(rule, event_handler).expect("failed to watch file!");
+        for rule_name in self.rules.as_slice() {
+            let rule_data_path = {
+                let mut rule_data_path = PathBuf::with_capacity(50);
+                rule_data_path.push("/var/usscraper/data");
+                rule_data_path.push(rule_name);
+                rule_data_path.push("data.json");
+                rule_data_path
+            };
+            self.hw.watch(rule_data_path, event_handler).expect("failed to watch file!");
         }
     }
 }

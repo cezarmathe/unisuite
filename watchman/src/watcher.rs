@@ -46,8 +46,8 @@ impl Actor for WatcherActor {
         // watch all rules
         for rule_name in self.rules.as_slice() {
             let rule_data_path = {
-                // 50 = 20(/var/usscraper/data/) + 10(rule name length) + 10(/data.json)
-                let mut rule_data_path = PathBuf::with_capacity(50);
+                // 80 = 20(/var/usscraper/data/) + 50(rule name length) + 10(/data.json)
+                let mut rule_data_path = PathBuf::with_capacity(80);
                 rule_data_path.push("/var/usscraper/data");
                 rule_data_path.push(rule_name);
                 rule_data_path.push("data.json");

@@ -10,7 +10,7 @@ package:
 		--tag "$(TAG):$(VERSION)" \
 		.
 	rm ./watchman
-.PHONY: build
+.PHONY: package
 
 push: package
 	docker push "$(TAG):$(VERSION)"

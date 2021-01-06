@@ -17,9 +17,6 @@ ARG GID=1000
 # Create watchman user.
 RUN addgroup --gid ${GID} -S watchman && adduser --uid ${UID} -h /var/watchman -s /bin/bash -S -G watchman watchman
 
-# Debug / release binary
-ARG ARTIFACT=debug
-
 # Copy binaries.
 COPY ./watchman /usr/local/bin/watchman
 

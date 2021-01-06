@@ -34,4 +34,5 @@ module "prod" {
 # Image IDs to use for the containers
 locals {
   usscraper_image = var.deploy_environment == "prod" ? module.prod.usscraper_image_id : module.dev.usscraper_image_id
+  watchman_image = var.deploy_environment == "prod" ? module.prod.watchman_image_id : module.dev.watchman_image_id
 }

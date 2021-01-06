@@ -37,3 +37,18 @@ resource "docker_container" "usscraper" {
   restart  = "unless-stopped"
   start    = true
 }
+
+resource "docker_container" "watchman" {
+  name  = "watchman"
+  image = local.watchman_image
+
+  # data volume
+  volumes {
+    volume_name    = docker_volume.usscraper_data.name
+    container_path = "/var/usscraper/data"
+  }
+
+  must_run = true
+  restart  = "unless-stopped"
+  start    = true
+}

@@ -29,16 +29,16 @@ impl Actor for WatcherActor {
         let event_handler = |event: Event| {
             match event {
                 Event::Create(path) => {
-                    // send a message
+                    println!("Event::Create, path: {}", path.display());
                 },
                 Event::Write(path) => {
-                    // send a message
+                    println!("Event::Write, path: {}", path.display());
                 },
                 Event::Error(err, path) => {
-                    // log the error
+                    println!("Event::Error, path: {}, err: {}", path.unwrap_or_default().display(), err);
                 }
                 _ => {
-                    // log the event name
+                    println!("event: {:?}", event);
                 },
             }
         };

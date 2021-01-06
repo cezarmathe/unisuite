@@ -1,0 +1,23 @@
+# watchman makefile
+
+TAG = cezarmathe/watchman
+VERSION = 0.1.0
+
+package:
+	cargo build $(shell if [[ "$(VERSION)" != "dev" ]]; then printf "%s" "--release"; fi)
+	cp "../target/$(shell if [[ "$(VERSION)" != "dev" ]]; then printf "%s" "release"; else printf "%s" "debug"; fi)/watchman" .
+	docker build \
+		--tag "$(TAG):$(VERSION)" \
+		.
+	rm ./watchman
+.PHONY: build
+
+push: package
+	docker push "$(TAG):$(VERSION)"
+.PHONY: push
+
+save-image: package
+	docker image save \
+		-o "../shared/$(shell printf "%s" "$(TAG)" | cut -d '/' -f 2)-$(VERSION).tar" \
+		"$(TAG):$(VERSION)"
+.PHONY: save-image

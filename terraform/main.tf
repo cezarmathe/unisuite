@@ -18,10 +18,7 @@ provider "docker" {
 module "dev" {
   source = "./modules/dev"
 
-  docker_host = var.docker_host
   use_module  = var.deploy_environment == "dev"
-
-  usscraper_image_version = var.usscraper_image_version
 }
 
 # Production module for using production images.
@@ -36,5 +33,5 @@ module "prod" {
 
 # Image IDs to use for the containers
 locals {
-  usscraper_image = var.deploy_environment == "dev" ? module.dev.usscraper_image_id : module.prod.usscraper_image_id
+  usscraper_image = var.deploy_environment == "prod" ? module.prod.usscraper_image_id : module.dev.usscraper_image_id
 }

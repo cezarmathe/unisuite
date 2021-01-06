@@ -19,6 +19,11 @@ deploy-auto:
 		--auto-approve
 .PHONY: deploy-auto
 
+destroy:
+	terraform workspace select $(ENVIRONMENT)
+	terraform destroy -var-file=env/$(ENVIRONMENT).tfvars
+.PHONY: destroy
+
 init:
 	terraform init
 	terraform workspace new dev

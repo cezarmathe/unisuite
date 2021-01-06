@@ -18,7 +18,7 @@ resource "docker_container" "usscraper" {
 
     content {
       file    = "/var/usscraper/rules/${upload.value}.rule"
-      content = file("${path.module}/../scraper/rules/${upload.value}.rule")
+      content = file("${path.module}/../usscraper/rules/${upload.value}.rule")
     }
   }
 

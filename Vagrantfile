@@ -9,6 +9,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.synced_folder "./shared", "/mnt"
 
+  config.vm.provision "file", source: "./scripts/artifacts.sh", destination: "/home/vagrant/.bin/artifacts"
   config.vm.provision "shell" do |s|
     s.args   = %x{ssh-add -L}
     s.inline = <<-SHELL

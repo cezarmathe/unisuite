@@ -8,12 +8,14 @@ dev:
 	cross build --target x86_64-unknown-linux-musl
 	./scripts/artifacts.sh dev
 	cd terraform; make; cd ..
+	docker image prune --force
 .PHONY: dev
 
 prod:
 	cross build --target x86_64-unknown-linux-musl --release
 	./scripts/artifacts.sh prod
 	cd terraform; make deploy ENVIRONMENT=prod; cd ..
+	docker image prune --force
 .PHONY: prod
 
 sshfs-mount:

@@ -16,3 +16,8 @@ variable "usscraper_image_version" {
   type        = string
   description = "Scraper version to use for deployment."
 }
+
+variable "watchman_image_version" {
+  type        = string
+  description = "Watchman version to use for deployment."
+}

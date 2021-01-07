@@ -29,6 +29,7 @@ module "prod" {
   use_module  = var.deploy_environment == "prod"
 
   usscraper_image_version = var.usscraper_image_version
+  watchman_image_version  = var.watchman_image_version
 }
 
 # Image IDs to use for the containers

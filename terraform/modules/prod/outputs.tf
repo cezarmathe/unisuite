@@ -3,3 +3,7 @@
 output "usscraper_image_id" {
   value = var.use_module ? docker_image.usscraper[0].latest : ""
 }
+
+output "watchman_image_id" {
+  value = var.use_module ? docker_image.watchman[0].latest : ""
+}

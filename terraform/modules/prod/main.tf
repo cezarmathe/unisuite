@@ -23,3 +23,13 @@ resource "docker_image" "usscraper" {
   name          = data.docker_registry_image.usscraper.name
   pull_triggers = [data.docker_registry_image.usscraper.sha256_digest]
 }
+
+data "docker_registry_image" "watchman" {
+  name = "cezarmathe/watchman:${var.watchman_image_version}"
+}
+
+resource "docker_image" "watchman" {
+  count         = var.use_module ? 1 : 0
+  name          = data.docker_registry_image.watchman.name
+  pull_triggers = [data.docker_registry_image.watchman.sha256_digest]
+}

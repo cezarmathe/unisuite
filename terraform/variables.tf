@@ -14,6 +14,7 @@ variable "deploy_environment" {
 variable "usscraper_image_version" {
   type        = string
   description = "Scraper version to use for deployment."
+  default     = ""
 }
 
 variable "usscraper_default_mountpoint" {
@@ -55,4 +56,10 @@ variable "usscraper_log_level" {
   type        = number
   description = "Log level: from 2(CRITICAL) to 7(DEBUG). Default is 5(NOTICE)."
   default     = 5
+}
+
+variable "watchman_image_version" {
+  type        = string
+  description = "Watchman version to use for deployment."
+  default     = ""
 }

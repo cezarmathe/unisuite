@@ -16,3 +16,6 @@ usscraper_data_mountpoint    = ""
 usscraper_image_version      = ""
 usscraper_log_level          = 5
 usscraper_rules              = []
+
+# watchman
+watchman_image_version = ""

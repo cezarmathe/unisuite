@@ -8,7 +8,6 @@ Vagrant.configure("2") do |config|
   config.vm.box = "generic/alpine#{alpine_version.join("")}"
 
   config.vm.synced_folder "./shared/artifacts", "/mnt", create: true
-  config.vm.synced_folder "./shared/srv", "/srv", create: true
 
   config.vm.provision "file", source: "./scripts/artifacts.sh", destination: "/home/vagrant/.bin/artifacts"
   config.vm.provision "shell" do |s|
@@ -32,6 +31,9 @@ Vagrant.configure("2") do |config|
       rc-service docker-volume-local-persist start
 
       adduser vagrant docker
+
+      mkdir -p /srv/file
+      chown -R vagrant:vagrant /srv/file
     SHELL
   end
 end

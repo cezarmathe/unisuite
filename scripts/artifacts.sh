@@ -13,7 +13,7 @@ function artifacts_dev() {
         make save-image VERSION=dev
         cd ..
     done
-    chmod 644 ./shared/*.tar
+    chmod 644 ./shared/artifacts/*.tar
 
     vagrant ssh --command "/home/vagrant/.bin/artifacts import"
 

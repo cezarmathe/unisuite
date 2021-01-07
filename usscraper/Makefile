@@ -15,6 +15,6 @@ push: package
 
 save-image: package
 	docker image save \
-		-o "../shared/$(shell printf "%s" "$(TAG)" | cut -d '/' -f 2)-$(VERSION).tar" \
+		-o "../shared/artifacts/$(shell printf "%s" "$(TAG)" | cut -d '/' -f 2)-$(VERSION).tar" \
 		"$(TAG):$(VERSION)"
 .PHONY: save-image

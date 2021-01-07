@@ -5,14 +5,14 @@ COMPONENTS = scraper watchman
 all: dev
 
 dev:
-	cross build --target x86_64-unknown-linux-musl
+	cargo build --target x86_64-unknown-linux-musl
 	./scripts/artifacts.sh dev
 	cd terraform; make; cd ..
 	docker image prune --force
 .PHONY: dev
 
 prod:
-	cross build --target x86_64-unknown-linux-musl --release
+	cargo build --target x86_64-unknown-linux-musl --release
 	./scripts/artifacts.sh prod
 	cd terraform; make deploy ENVIRONMENT=prod; cd ..
 	docker image prune --force

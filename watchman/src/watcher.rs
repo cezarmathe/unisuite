@@ -53,6 +53,7 @@ impl Actor for WatcherActor {
                 rule_data_path.push("data.json");
                 rule_data_path
             };
+            println!("Watching rule {}", rule_name);
             self.hw.watch(rule_data_path, event_handler).expect("failed to watch file!");
         }
     }

@@ -2,17 +2,21 @@
 
 COMPONENTS = scraper watchman
 
+# Cargo command to use for building.
+# You can use either cargo or cross.
+CARGO = cargo
+
 all: dev
 
 dev:
-	cargo build --target x86_64-unknown-linux-musl
+	$(CARGO) build --target x86_64-unknown-linux-musl
 	./scripts/artifacts.sh dev
 	cd terraform; make; cd ..
 	docker image prune --force
 .PHONY: dev
 
 prod:
-	cargo build --target x86_64-unknown-linux-musl --release
+	$(CARGO) build --target x86_64-unknown-linux-musl --release
 	./scripts/artifacts.sh prod
 	cd terraform; make deploy ENVIRONMENT=prod; cd ..
 	docker image prune --force

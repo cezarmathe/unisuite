@@ -42,6 +42,10 @@ resource "docker_container" "watchman" {
   name  = "watchman"
   image = local.watchman_image
 
+  env = [
+    "USSCRAPER_RULES=${join(",", var.usscraper_rules)}"
+  ]
+
   # data volume
   volumes {
     volume_name    = docker_volume.usscraper_data.name

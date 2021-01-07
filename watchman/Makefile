@@ -4,8 +4,7 @@ TAG = cezarmathe/watchman
 VERSION = 0.1.0
 
 package:
-	cargo build $(shell if [[ "$(VERSION)" != "dev" ]]; then printf "%s" "--release"; fi)
-	cp "../target/$(shell if [[ "$(VERSION)" != "dev" ]]; then printf "%s" "release"; else printf "%s" "debug"; fi)/watchman" .
+	cp "../target/x86_64-unknown-linux-musl/$(shell if [[ "$(VERSION)" != "dev" ]]; then printf "%s" "release"; else printf "%s" "debug"; fi)/watchman" .
 	docker build \
 		--tag "$(TAG):$(VERSION)" \
 		.

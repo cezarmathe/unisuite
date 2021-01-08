@@ -6,6 +6,23 @@ use actix::prelude::*;
 
 use hotwatch::{Hotwatch, Event};
 
+/// An event raised by the watcher.
+/// We only really care if the file changed, at this point.
+pub struct WatcherEvent<'s> {
+    rule_name: &'s str,
+    cg_detected: std::time::Instant,
+}
+
+impl<'s> WatcherEvent<'s> {
+    /// Create a new WatcherEvent.
+    pub fn new(rule_name: &'s str) -> Self {
+        Self {
+            rule_name,
+            cg_detected: std::time::Instant::now(),
+        }
+    }
+}
+
 pub struct WatcherActor {
     rules: Vec<String>,
     hw: Hotwatch,

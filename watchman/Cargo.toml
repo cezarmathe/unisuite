@@ -9,7 +9,9 @@ edition = "2018"
 [dependencies]
 actix = "0.10.0"
 actix-rt = "1.1.1"
+anyhow = "1.0.37"
 hotwatch = "0.4.5"
+log = "0.4.11"
 prost = "0.6.0"
 tokio = { version = "1.0.1", features = ["full"] }
 tonic = { version = "0.3.1", features = ["tls"] }

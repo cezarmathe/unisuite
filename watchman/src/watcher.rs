@@ -114,7 +114,8 @@ impl Actor for WatcherActor {
                 }
             }
             if let Some(val) = rule {
-                println!("rule updated: {:?}", val);
+                let watcher_event = WatcherEvent::new(val);
+                println!("rule updated: {:?}", watcher_event);
             }
         };
 

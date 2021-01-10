@@ -10,7 +10,7 @@ use actix::prelude::*;
 use hotwatch::{Event, Hotwatch};
 
 #[derive(Debug)]
-pub struct ScraperRule(String);
+pub struct ScraperRule(pub String);
 
 impl ScraperRule {
     pub fn new(name: String) -> Self {
@@ -62,16 +62,17 @@ impl Into<PathBuf> for &ScraperRule {
 
 /// An event raised by the watcher.
 /// We only really care if the file changed, at this point.
-pub struct WatcherEvent<'s> {
-    rule_name: &'s str,
+#[derive(Debug)]
+pub struct WatcherEvent {
+    rule: ScraperRule,
     cg_detected: std::time::Instant,
 }
 
-impl<'s> WatcherEvent<'s> {
+impl WatcherEvent {
     /// Create a new WatcherEvent.
-    pub fn new(rule_name: &'s str) -> Self {
+    pub fn new(rule: ScraperRule) -> Self {
         Self {
-            rule_name,
+            rule,
             cg_detected: std::time::Instant::now(),
         }
     }

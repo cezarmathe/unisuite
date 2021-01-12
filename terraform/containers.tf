@@ -37,7 +37,7 @@ resource "docker_container" "usscraper" {
     "MOODLE_USERNAME=${var.moodle_username}",
     "MOODLE_PASSWORD=${var.moodle_password}",
     "MOODLE_SERVICE_NAME=${var.moodle_service_name}",
-    "LOG_LEVEL=${var.usscraper_log_level}"
+    "LOG_LEVEL=${var.usscraper_log_level != "" ? var.usscraper_log_level : var.log_level}",
   ]
 
   # upload rules
@@ -73,6 +73,7 @@ resource "docker_container" "watchman" {
   env = [
     "USSCRAPER_RULES=${join(",", var.usscraper_rules)}",
     "SYSLOG=${docker_container.syslog.network_data[0].ip_address}:514",
+    "LOG_LEVEL=${var.watchman_log_level != "" ? var.watchman_log_level : var.log_level}",
   ]
 
   networks_advanced {

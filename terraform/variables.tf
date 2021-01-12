@@ -68,3 +68,14 @@ variable "syslog_data_mountpoint" {
   type        = string
   description = "Host mountpoint for the syslog data volume."
 }
+
+variable "watchman_log_level" {
+  type        = string
+  description = "Watchman log level."
+  default     = ""
+}
+
+variable "log_level" {
+  type        = string
+  description = "Global log level. OFF, CRITICAL, ERROR, WARN, INFO, DEBUG, TRACE."
+}

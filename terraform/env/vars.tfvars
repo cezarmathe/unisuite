@@ -3,6 +3,7 @@
 # General variables
 docker_host        = ""
 deploy_environment = "" # dev / prod
+log_level          = "" # OFF, CRITICAL, ERROR, WARN, INFO, DEBUG, TRACE
 
 # Moodle
 moodle_baseurl      = ""
@@ -19,6 +20,7 @@ usscraper_rules              = []
 
 # watchman
 watchman_image_version = ""
+watchman_log_level     = ""
 
 # syslog
 syslog_data_mountpoint = ""

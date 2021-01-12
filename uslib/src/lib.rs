@@ -17,9 +17,6 @@ pub use slog::warn;
 tonic::include_proto!("com.cezarmathe.unisuite");
 
 /// Root logger.
-///
-/// Possible logging levels:
-/// OFF, CRITICAL, ERROR, WARN, INFO, DEBUG, TRACE
 pub static LOGGER: Lazy<Logger> = Lazy::new(|| {
     use std::net::SocketAddr;
     use std::net::ToSocketAddrs;

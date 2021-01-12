@@ -19,3 +19,6 @@ usscraper_rules              = []
 
 # watchman
 watchman_image_version = ""
+
+# syslog
+syslog_data_mountpoint = ""

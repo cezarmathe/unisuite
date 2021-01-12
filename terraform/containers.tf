@@ -1,5 +1,33 @@
 # unisuite - containers
 
+resource "docker_container" "syslog" {
+  name  = "syslog"
+  image = docker_image.syslog.latest
+
+  capabilities {
+    add  = ["NET_BIND_SERVICE"]
+  }
+
+  networks_advanced {
+    name = docker_network.syslog.name
+  }
+
+  upload {
+    file = "/etc/syslog-ng/syslog-ng.conf"
+    content = file("${path.module}/syslog-ng.conf")
+  }
+
+  # data volume
+  volumes {
+    volume_name    = docker_volume.syslog_data.name
+    container_path = "/var/log/unisuite"
+  }
+
+  must_run = true
+  restart  = "unless-stopped"
+  start    = true
+}
+
 resource "docker_container" "usscraper" {
   name  = "usscraper"
   image = local.usscraper_image
@@ -43,8 +71,13 @@ resource "docker_container" "watchman" {
   image = local.watchman_image
 
   env = [
-    "USSCRAPER_RULES=${join(",", var.usscraper_rules)}"
+    "USSCRAPER_RULES=${join(",", var.usscraper_rules)}",
+    "SYSLOG=${docker_container.syslog.network_data[0].ip_address}:514",
   ]
+
+  networks_advanced {
+    name = docker_network.syslog.name
+  }
 
   # data volume
   volumes {

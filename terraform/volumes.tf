@@ -15,3 +15,11 @@ resource "docker_volume" "usscraper_data" {
     mountpoint = var.usscraper_data_mountpoint
   }
 }
+
+resource "docker_volume" "syslog_data" {
+  name        = "syslog_data"
+  driver      = "local-persist"
+  driver_opts = {
+    mountpoint = var.syslog_data_mountpoint
+  }
+}

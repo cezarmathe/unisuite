@@ -63,3 +63,8 @@ variable "watchman_image_version" {
   description = "Watchman version to use for deployment."
   default     = ""
 }
+
+variable "syslog_data_mountpoint" {
+  type        = string
+  description = "Host mountpoint for the syslog data volume."
+}

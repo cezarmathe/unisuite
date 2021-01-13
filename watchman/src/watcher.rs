@@ -188,7 +188,7 @@ impl RuleWatcher {
             }
         }
         if let Some(val) = rule {
-            uslib::info!(uslib::LOGGER, "rule watcher: handle event: received meaningful event: {}", val.0.as_str());
+            uslib::info!(uslib::LOGGER, "rule watcher: handle event: received meaningful event: {}\n", val.0.as_str());
         }
     }
 }

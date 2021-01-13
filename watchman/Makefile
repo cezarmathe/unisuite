@@ -1,7 +1,7 @@
 # watchman makefile
 
 TAG = cezarmathe/watchman
-VERSION = 0.1.1
+VERSION = 0.1.2
 
 package:
 	cp "../target/x86_64-unknown-linux-musl/$(shell if [[ "$(VERSION)" != "dev" ]]; then printf "%s" "release"; else printf "%s" "debug"; fi)/watchman" .

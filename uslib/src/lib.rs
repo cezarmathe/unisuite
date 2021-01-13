@@ -5,8 +5,9 @@ use slog::Level;
 use slog::Logger;
 use slog_syslog::Facility;
 
-use once_cell::sync::Lazy;
-
+pub use once_cell::sync::Lazy;
+pub use once_cell::sync::OnceCell;
+pub use parking_lot;
 pub use slog::crit;
 pub use slog::debug;
 pub use slog::error;
@@ -14,7 +15,9 @@ pub use slog::info;
 pub use slog::trace;
 pub use slog::warn;
 
-tonic::include_proto!("com.cezarmathe.unisuite");
+pub mod proto {
+    tonic::include_proto!("com.cezarmathe.unisuite");
+}
 
 /// Root logger.
 pub static LOGGER: Lazy<Logger> = Lazy::new(|| {

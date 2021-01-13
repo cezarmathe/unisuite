@@ -15,12 +15,15 @@ struct AsBotClientConfig {
 impl AsBotClientConfig {
     /// Load the AsBot client configuration.
     pub async fn load() -> anyhow::Result<Self> {
+        uslib::debug!(uslib::LOGGER, "asbot client config: load\n");
         let address: String;
         match std::env::var("WATCHMAN_ASBOT_ADDRESS") {
             Ok(value) => address = value.to_string(),
-            Err(e) => bail!("asbot client config: failed to load: WATCHMAN_ASBOT_ADDRESS not found: {}\n", e),
+            Err(e) => bail!("asbot client config: load: WATCHMAN_ASBOT_ADDRESS not found: {}\n", e),
         }
-        Ok(Self { address })
+        let config = Self { address };
+        uslib::trace!(uslib::LOGGER, "asbot client config: load: {:?}\n", config);
+        Ok(config)
     }
 }
 
@@ -33,19 +36,22 @@ pub struct AsBotClient {
 impl AsBotClient {
     /// Initialize the AsBotClient.
     pub async fn init() -> anyhow::Result<()> {
+        uslib::trace!(uslib::LOGGER, "asbot client: init\n");
         let config = AsBotClientConfig::load().await?;
         let mevents_client: MoodleEventsClient<tonic::transport::channel::Channel>;
 
-        uslib::info!(
+        uslib::debug!(
             uslib::LOGGER,
-            "asbot client: connecting to {}\n",
+            "asbot client: init: connecting to {}\n",
             config.address.as_str()
         );
         match MoodleEventsClient::connect(config.address.clone()).await {
             Ok(value) => mevents_client = value,
-            Err(e) => bail!("asbot client: failed to init: {}\n", e),
+            Err(e) => bail!("asbot client: init: {}\n", e),
         }
+        uslib::trace!(uslib::LOGGER, "asbot client: init: connection ok\n");
 
+        uslib::trace!(uslib::LOGGER, "asbot client: init: setting up singleton\n");
         if CLIENT
             .set(Mutex::new(AsBotClient {
                 config,
@@ -53,9 +59,11 @@ impl AsBotClient {
             }))
             .is_err()
         {
-            bail!("asbot client: failed to init: already initialized\n");
+            bail!("asbot client: init: already initialized\n");
         };
+        uslib::trace!(uslib::LOGGER, "asbot client: init: singleton ok\n");
 
+        uslib::trace!(uslib::LOGGER, "asbot client: init: ok\n");
         Ok(())
     }
 }

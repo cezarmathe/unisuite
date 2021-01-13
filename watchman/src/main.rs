@@ -1,42 +1,45 @@
 #[macro_use]
 extern crate anyhow;
 
-mod config;
+mod asbot_client;
 mod watcher;
 
-use watcher::RuleWatcher;
-
-use std::sync::Mutex;
-
-use uslib::LOGGER;
-
 #[tokio::main]
-async fn main() -> anyhow::Result<()> {
-    let rules = std::env::var("USSCRAPER_RULES").unwrap();
-    let rules_vec: Vec<config::ScraperRule> = rules
-        .split(",")
-        .map(|s| config::ScraperRule::new(s.to_string()))
-        .collect();
+async fn main() {
+    uslib::info!(uslib::LOGGER, "hello world\n");
 
-    uslib::info!(LOGGER, "hello world\n");
-
-    let rule_watcher_mutex = Mutex::new(RuleWatcher::new(rules_vec)?);
-    {
-        let mut rule_watcher = rule_watcher_mutex.lock().unwrap();
-        rule_watcher.start().await?;
+    // initialization
+    if let Err(e) = asbot_client::AsBotClient::init().await {
+        uslib::crit!(uslib::LOGGER, "initialization: {}\n", e);
+        return;
+    }
+    if let Err(e) = watcher::RuleWatcher::init().await {
+        uslib::crit!(uslib::LOGGER, "initialization: {}\n", e);
+        return;
     }
 
-    tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())?
+    // starting
+    {
+        if let Err(e) = watcher::RuleWatcher::start().await {
+            uslib::crit!(uslib::LOGGER, "starting: {}\n", e);
+            return;
+        }
+    }
+
+    // waiting for termination signal
+    tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
+        .unwrap()
         .recv()
         .await
         .unwrap();
 
+    // graceful shutdown
     {
-        let mut rule_watcher = rule_watcher_mutex.lock().unwrap();
-        rule_watcher.stop().await?;
+        if let Err(e) = watcher::RuleWatcher::stop().await {
+            uslib::error!(uslib::LOGGER, "stopping: {}\n", e);
+            return;
+        }
     }
 
-    uslib::info!(LOGGER, "goodbye\n");
-
-    Ok(())
+    uslib::info!(uslib::LOGGER, "goodbye\n");
 }

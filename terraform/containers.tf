@@ -71,7 +71,7 @@ resource "docker_container" "watchman" {
   image = local.watchman_image
 
   env = [
-    "USSCRAPER_RULES=${join(",", var.usscraper_rules)}",
+    "WATCHMAN_RULES=${join(",", var.usscraper_rules)}",
     "SYSLOG=${docker_container.syslog.network_data[0].ip_address}:514",
     "LOG_LEVEL=${var.watchman_log_level != "" ? var.watchman_log_level : var.log_level}",
   ]

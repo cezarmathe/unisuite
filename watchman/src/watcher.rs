@@ -77,7 +77,7 @@ impl RuleWatcherConfig {
         let rules_string: String;
         match std::env::var("WATCHMAN_RULES") {
             Ok(value) => rules_string = value,
-            Err(e) => bail!("rule watcher config: failed to load: {}\n", e),
+            Err(e) => bail!("rule watcher config: failed to load: WATCHMAN_RULES not found: {}\n", e),
         }
 
         let rules: Vec<ScraperRule> = rules_string

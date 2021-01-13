@@ -18,7 +18,7 @@ impl AsBotClientConfig {
         let address: String;
         match std::env::var("WATCHMAN_ASBOT_ADDRESS") {
             Ok(value) => address = value.to_string(),
-            Err(e) => bail!("asbot client config: failed to load: {}\n", e),
+            Err(e) => bail!("asbot client config: failed to load: WATCHMAN_ASBOT_ADDRESS not found: {}\n", e),
         }
         Ok(Self { address })
     }

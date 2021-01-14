@@ -1,5 +1,7 @@
 //! File watcher.
 
+use crate::asbot_client::CLIENT as ASBOT_CLIENT;
+
 use std::cell::RefCell;
 use std::convert::TryFrom;
 use std::path::Component;
@@ -9,6 +11,7 @@ use std::path::PathBuf;
 use hotwatch::{Event, Hotwatch};
 
 use uslib::parking_lot::Mutex;
+use uslib::proto::NotifyRequest;
 
 /// Rule watcher.
 pub static RULE_WATCHER: uslib::OnceCell<Mutex<RuleWatcher>> = uslib::OnceCell::new();
@@ -155,7 +158,8 @@ impl RuleWatcher {
         Ok(())
     }
 
-    fn handle_event(event: Event) {
+    #[tokio::main]
+    async fn handle_event(event: Event) {
         uslib::trace!(uslib::LOGGER, "rule watcher: handle event\n");
         let mut rule: Option<ScraperRule> = None;
         match event {
@@ -189,6 +193,11 @@ impl RuleWatcher {
         }
         if let Some(val) = rule {
             uslib::info!(uslib::LOGGER, "rule watcher: handle event: received meaningful event: {}\n", val.0.as_str());
+            let mut client = ASBOT_CLIENT.get().unwrap().lock();
+            let mevents = &mut client.mevents_client;
+            if let Err(e) = mevents.notify(NotifyRequest {}).await {
+                uslib::error!(uslib::LOGGER, "rule watcher: handle event: {}", e);
+            }
         }
     }
 }

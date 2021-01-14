@@ -9,12 +9,11 @@ async fn main() {
 
     // initialization
 
-    // uncomment when there is an asbot
-    // uslib::debug!(uslib::LOGGER, "main: initializing asbot client\n");
-    // if let Err(e) = asbot_client::AsBotClient::init().await {
-    //     uslib::crit!(uslib::LOGGER, "main: initializing asbot client: {}\n", e);
-    //     return;
-    // }
+    uslib::debug!(uslib::LOGGER, "main: initializing asbot client\n");
+    if let Err(e) = asbot_client::AsBotClient::init().await {
+        uslib::crit!(uslib::LOGGER, "main: initializing asbot client: {}\n", e);
+        return;
+    }
     uslib::debug!(uslib::LOGGER, "main: initializing rule watcher\n");
     if let Err(e) = watcher::RuleWatcher::init().await {
         uslib::crit!(uslib::LOGGER, "main: initializing rule watcher: {}\n", e);

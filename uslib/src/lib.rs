@@ -24,6 +24,7 @@ pub use slog::error;
 pub use slog::info;
 pub use slog::trace;
 pub use slog::warn;
+pub use tonic::async_trait;
 
 pub mod proto {
     tonic::include_proto!("com.cezarmathe.unisuite");

@@ -30,11 +30,11 @@ impl TryFrom<&Path> for ScraperRule {
     fn try_from(src: &Path) -> uslib::Result<ScraperRule> {
         uslib::trace!(uslib::LOGGER, "scraper rule: try from path\n");
         if !src.starts_with("/var/usscraper/data") {
-            bail!("scraper rule: try from path: bad path prefix");
+            uslib::bail!("scraper rule: try from path: bad path prefix");
         }
         uslib::trace!(uslib::LOGGER, "scraper rule: try from path: path prefix ok\n");
         if !src.ends_with("data.json") {
-            bail!("scraper rule: try from path: bad suffix");
+            uslib::bail!("scraper rule: try from path: bad suffix");
         }
         uslib::trace!(uslib::LOGGER, "scraper rule: try from path: path suffix ok\n");
         let components: Vec<&str> = src
@@ -49,11 +49,11 @@ impl TryFrom<&Path> for ScraperRule {
             .map(|c| c.as_os_str().to_str().unwrap_or(""))
             .collect();
         if components.len() != 5 {
-            bail!("scraper rule: try from path: path does not have expected size");
+            uslib::bail!("scraper rule: try from path: path does not have expected size");
         }
         uslib::trace!(uslib::LOGGER, "scraper rule: try from path: path length ok\n");
         if components[3] == "" {
-            bail!("scraper rule: try from path: rule name is not valid utf-8\n");
+            uslib::bail!("scraper rule: try from path: rule name is not valid utf-8\n");
         }
         uslib::trace!(uslib::LOGGER, "scraper rule: try from path: path encoding ok: {}\n", components[3]);
         Ok(ScraperRule(components[3].to_string()))
@@ -83,7 +83,7 @@ impl RuleWatcherConfig {
         let rules_string: String;
         match std::env::var("WATCHMAN_RULES") {
             Ok(value) => rules_string = value,
-            Err(e) => bail!("rule watcher config: load: WATCHMAN_RULES not found: {}\n", e),
+            Err(e) => uslib::bail!("rule watcher config: load: WATCHMAN_RULES not found: {}\n", e),
         }
         uslib::trace!(uslib::LOGGER, "rule watcher config: load: environment variable ok\n");
         let rules: Vec<ScraperRule> = rules_string
@@ -115,7 +115,7 @@ impl RuleWatcher {
             }))
             .is_err()
         {
-            bail!("rule watcher: failed to init: already initialized\n");
+            uslib::bail!("rule watcher: failed to init: already initialized\n");
         };
         uslib::trace!(uslib::LOGGER, "rule watcher: init: singleton ok\n");
 

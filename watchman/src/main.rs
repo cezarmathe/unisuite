@@ -1,8 +1,5 @@
 //! Watchman
 
-#[macro_use]
-extern crate uslib;
-
 mod asbot_client;
 mod watcher;
 

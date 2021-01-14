@@ -47,7 +47,7 @@ impl AsBotClient {
         );
         match MoodleEventsClient::connect(config.address.clone()).await {
             Ok(value) => mevents_client = value,
-            Err(e) => bail!("asbot client: init: {}\n", e),
+            Err(e) => uslib::bail!("asbot client: init: {}\n", e),
         }
         uslib::trace!(uslib::LOGGER, "asbot client: init: connection ok\n");
 
@@ -59,7 +59,7 @@ impl AsBotClient {
             }))
             .is_err()
         {
-            bail!("asbot client: init: already initialized\n");
+            uslib::bail!("asbot client: init: already initialized\n");
         };
         uslib::trace!(uslib::LOGGER, "asbot client: init: singleton ok\n");
 

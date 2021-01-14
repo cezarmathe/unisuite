@@ -21,3 +21,8 @@ variable "watchman_image_version" {
   type        = string
   description = "Watchman version to use for deployment."
 }
+
+variable "asbot_image_version" {
+  type        = string
+  description = "Adam Smith bot version to use for deployment."
+}

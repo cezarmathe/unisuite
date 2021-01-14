@@ -24,3 +24,7 @@ watchman_log_level     = ""
 
 # syslog
 syslog_data_mountpoint = ""
+
+# asbot
+asbot_image_version = ""
+asbot_log_level     = ""

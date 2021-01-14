@@ -33,3 +33,14 @@ resource "docker_image" "watchman" {
   name          = data.docker_registry_image.watchman.name
   pull_triggers = [data.docker_registry_image.watchman.sha256_digest]
 }
+
+data "docker_registry_image" "asbot" {
+  count = var.use_module ? 1 : 0
+  name = "cezarmathe/asbot:${var.asbot_image_version}"
+}
+
+resource "docker_image" "asbot" {
+  count         = var.use_module ? 1 : 0
+  name          = data.docker_registry_image.asbot[0].name
+  pull_triggers = [data.docker_registry_image.asbot[0].sha256_digest]
+}

@@ -90,3 +90,21 @@ resource "docker_container" "watchman" {
   restart  = "unless-stopped"
   start    = true
 }
+
+resource "docker_container" "asbot" {
+  name  = "asbot"
+  image = local.asbot_image
+
+  env = [
+    "SYSLOG=${docker_container.syslog.network_data[0].ip_address}:514",
+    "LOG_LEVEL=${var.asbot_log_level != "" ? var.asbot_log_level : var.log_level}",
+  ]
+
+  networks_advanced {
+    name = docker_network.syslog.name
+  }
+
+  must_run = true
+  restart  = "unless-stopped"
+  start    = true
+}

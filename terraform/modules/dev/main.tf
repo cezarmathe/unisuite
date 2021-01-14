@@ -15,4 +15,5 @@ terraform {
 locals {
   usscraper_image_id = ""
   watchman_image_id  = ""
+  asbot_image_id     = ""
 }

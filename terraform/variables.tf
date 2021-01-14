@@ -79,3 +79,15 @@ variable "log_level" {
   type        = string
   description = "Global log level. OFF, CRITICAL, ERROR, WARN, INFO, DEBUG, TRACE."
 }
+
+variable "asbot_image_version" {
+  type        = string
+  description = "Adam Smith bot version to use for deployment."
+  default     = ""
+}
+
+variable "asbot_log_level" {
+  type        = string
+  description = "Adam Smith bot log level."
+  default     = ""
+}

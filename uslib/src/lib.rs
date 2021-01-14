@@ -1,6 +1,4 @@
 //! Unisuite library.
-#[macro_use]
-pub extern crate anyhow;
 
 use once_cell::sync::Lazy;
 

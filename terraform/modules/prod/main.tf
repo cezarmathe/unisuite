@@ -15,28 +15,30 @@ provider "docker" {
 }
 
 data "docker_registry_image" "usscraper" {
+  count = var.use_module ? 1 : 0
   name = "cezarmathe/usscraper:${var.usscraper_image_version}"
 }
 
 resource "docker_image" "usscraper" {
   count         = var.use_module ? 1 : 0
-  name          = data.docker_registry_image.usscraper.name
-  pull_triggers = [data.docker_registry_image.usscraper.sha256_digest]
+  name          = data.docker_registry_image.usscraper[0].name
+  pull_triggers = [data.docker_registry_image.usscraper[0].sha256_digest]
 }
 
 data "docker_registry_image" "watchman" {
-  name = "cezarmathe/watchman:${var.watchman_image_version}"
+  count = var.use_module ? 1 : 0
+  name  = "cezarmathe/watchman:${var.watchman_image_version}"
 }
 
 resource "docker_image" "watchman" {
   count         = var.use_module ? 1 : 0
-  name          = data.docker_registry_image.watchman.name
-  pull_triggers = [data.docker_registry_image.watchman.sha256_digest]
+  name          = data.docker_registry_image.watchman[0].name
+  pull_triggers = [data.docker_registry_image.watchman[0].sha256_digest]
 }
 
 data "docker_registry_image" "asbot" {
   count = var.use_module ? 1 : 0
-  name = "cezarmathe/asbot:${var.asbot_image_version}"
+  name  = "cezarmathe/asbot:${var.asbot_image_version}"
 }
 
 resource "docker_image" "asbot" {

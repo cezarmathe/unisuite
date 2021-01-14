@@ -1,13 +1,25 @@
 //! Unisuite library.
+#[macro_use]
+pub extern crate anyhow;
+
+use once_cell::sync::Lazy;
 
 use slog::Drain;
 use slog::Level;
 use slog::Logger;
 use slog_syslog::Facility;
 
-pub use once_cell::sync::Lazy;
-pub use once_cell::sync::OnceCell;
+// Common dependencies.
+pub use once_cell;
 pub use parking_lot;
+pub use slog;
+pub use tonic;
+
+// Useful re-exports.
+pub use anyhow::bail;
+pub use anyhow::Error;
+pub use anyhow::Result;
+pub use once_cell::sync::OnceCell;
 pub use slog::crit;
 pub use slog::debug;
 pub use slog::error;

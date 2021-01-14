@@ -151,7 +151,7 @@ impl RuleWatcher {
             let path: &PathBuf = &rule.into();
             hw.unwatch(path)?
         }
-        uslib::trace!(uslib::LOGGER, "rule watcher: start ok\n");
+        uslib::trace!(uslib::LOGGER, "rule watcher: stop ok\n");
         Ok(())
     }
 

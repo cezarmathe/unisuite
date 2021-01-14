@@ -14,12 +14,12 @@ struct AsBotClientConfig {
 
 impl AsBotClientConfig {
     /// Load the AsBot client configuration.
-    pub async fn load() -> anyhow::Result<Self> {
+    pub async fn load() -> uslib::Result<Self> {
         uslib::debug!(uslib::LOGGER, "asbot client config: load\n");
         let address: String;
         match std::env::var("WATCHMAN_ASBOT_ADDRESS") {
             Ok(value) => address = value.to_string(),
-            Err(e) => bail!("asbot client config: load: WATCHMAN_ASBOT_ADDRESS not found: {}\n", e),
+            Err(e) => uslib::bail!("asbot client config: load: WATCHMAN_ASBOT_ADDRESS not found: {}\n", e),
         }
         let config = Self { address };
         uslib::trace!(uslib::LOGGER, "asbot client config: load: {:?}\n", config);
@@ -30,15 +30,15 @@ impl AsBotClientConfig {
 /// Adam Smith bot client.
 pub struct AsBotClient {
     config: AsBotClientConfig,
-    pub mevents_client: MoodleEventsClient<tonic::transport::channel::Channel>,
+    pub mevents_client: MoodleEventsClient<uslib::tonic::transport::channel::Channel>,
 }
 
 impl AsBotClient {
     /// Initialize the AsBotClient.
-    pub async fn init() -> anyhow::Result<()> {
+    pub async fn init() -> uslib::Result<()> {
         uslib::trace!(uslib::LOGGER, "asbot client: init\n");
         let config = AsBotClientConfig::load().await?;
-        let mevents_client: MoodleEventsClient<tonic::transport::channel::Channel>;
+        let mevents_client: MoodleEventsClient<uslib::tonic::transport::channel::Channel>;
 
         uslib::debug!(
             uslib::LOGGER,

@@ -25,9 +25,9 @@ impl ScraperRule {
 }
 
 impl TryFrom<&Path> for ScraperRule {
-    type Error = anyhow::Error;
+    type Error = uslib::Error;
 
-    fn try_from(src: &Path) -> anyhow::Result<ScraperRule> {
+    fn try_from(src: &Path) -> uslib::Result<ScraperRule> {
         uslib::trace!(uslib::LOGGER, "scraper rule: try from path\n");
         if !src.starts_with("/var/usscraper/data") {
             bail!("scraper rule: try from path: bad path prefix");
@@ -78,7 +78,7 @@ struct RuleWatcherConfig {
 
 impl RuleWatcherConfig {
     /// Load the rule watcher configuration.
-    pub async fn load() -> anyhow::Result<Self> {
+    pub async fn load() -> uslib::Result<Self> {
         uslib::debug!(uslib::LOGGER, "rule watcher config: load\n");
         let rules_string: String;
         match std::env::var("WATCHMAN_RULES") {
@@ -103,7 +103,7 @@ pub struct RuleWatcher {
 
 impl RuleWatcher {
     /// Initialize the rule watcher.
-    pub async fn init() -> anyhow::Result<()> {
+    pub async fn init() -> uslib::Result<()> {
         uslib::trace!(uslib::LOGGER, "rule watcher: init\n");
         let config = RuleWatcherConfig::load().await?;
 
@@ -126,7 +126,7 @@ impl RuleWatcher {
     /// Start the rule watcher.
     ///
     /// This will start watching all rules.
-    pub async fn start() -> anyhow::Result<()> {
+    pub async fn start() -> uslib::Result<()> {
         uslib::trace!(uslib::LOGGER, "rule watcher: start\n");
         let rule_watcher = RULE_WATCHER.get().unwrap().lock();
         let mut hw = rule_watcher.hw.borrow_mut();
@@ -142,7 +142,7 @@ impl RuleWatcher {
     /// Stop the rule watcher.
     ///
     /// This will stop watching all rules.
-    pub async fn stop() -> anyhow::Result<()> {
+    pub async fn stop() -> uslib::Result<()> {
         uslib::trace!(uslib::LOGGER, "rule watcher: stop\n");
         let rule_watcher = RULE_WATCHER.get().unwrap().lock();
         let mut hw = rule_watcher.hw.borrow_mut();

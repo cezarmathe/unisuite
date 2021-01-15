@@ -35,11 +35,17 @@ impl TryFrom<&Path> for ScraperRule {
         if !src.starts_with("/var/usscraper/data") {
             uslib::bail!("scraper rule: try from path: bad path prefix");
         }
-        uslib::trace!(uslib::LOGGER, "scraper rule: try from path: path prefix ok\n");
+        uslib::trace!(
+            uslib::LOGGER,
+            "scraper rule: try from path: path prefix ok\n"
+        );
         if !src.ends_with("data.json") {
             uslib::bail!("scraper rule: try from path: bad suffix");
         }
-        uslib::trace!(uslib::LOGGER, "scraper rule: try from path: path suffix ok\n");
+        uslib::trace!(
+            uslib::LOGGER,
+            "scraper rule: try from path: path suffix ok\n"
+        );
         let components: Vec<&str> = src
             .components()
             .filter(|c| {
@@ -54,22 +60,34 @@ impl TryFrom<&Path> for ScraperRule {
         if components.len() != 5 {
             uslib::bail!("scraper rule: try from path: path does not have expected size");
         }
-        uslib::trace!(uslib::LOGGER, "scraper rule: try from path: path length ok\n");
+        uslib::trace!(
+            uslib::LOGGER,
+            "scraper rule: try from path: path length ok\n"
+        );
         if components[3] == "" {
             uslib::bail!("scraper rule: try from path: rule name is not valid utf-8\n");
         }
-        uslib::trace!(uslib::LOGGER, "scraper rule: try from path: path encoding ok: {}\n", components[3]);
+        uslib::trace!(
+            uslib::LOGGER,
+            "scraper rule: try from path: path encoding ok: {}\n",
+            components[3]
+        );
         Ok(ScraperRule(components[3].to_string()))
     }
 }
 
 impl Into<PathBuf> for &ScraperRule {
-    fn into(self) -> PathBuf {        // 80 = 20(/var/usscraper/data/) + 50(rule name length) + 10(/data.json)
+    fn into(self) -> PathBuf {
+        // 80 = 20(/var/usscraper/data/) + 50(rule name length) + 10(/data.json)
         let mut rule_data_path = PathBuf::with_capacity(80);
         rule_data_path.push("/var/usscraper/data");
         rule_data_path.push(&self.0);
         rule_data_path.push("data.json");
-        uslib::trace!(uslib::LOGGER, "scraper rule: into pathbuf: {}\n", rule_data_path.display());
+        uslib::trace!(
+            uslib::LOGGER,
+            "scraper rule: into pathbuf: {}\n",
+            rule_data_path.display()
+        );
         rule_data_path
     }
 }
@@ -86,14 +104,24 @@ impl RuleWatcherConfig {
         let rules_string: String;
         match std::env::var("WATCHMAN_RULES") {
             Ok(value) => rules_string = value,
-            Err(e) => uslib::bail!("rule watcher config: load: WATCHMAN_RULES not found: {}\n", e),
+            Err(e) => uslib::bail!(
+                "rule watcher config: load: WATCHMAN_RULES not found: {}\n",
+                e
+            ),
         }
-        uslib::trace!(uslib::LOGGER, "rule watcher config: load: environment variable ok\n");
+        uslib::trace!(
+            uslib::LOGGER,
+            "rule watcher config: load: environment variable ok\n"
+        );
         let rules: Vec<ScraperRule> = rules_string
             .split(",")
             .map(|s| ScraperRule::new(s.to_string()))
             .collect();
-        uslib::trace!(uslib::LOGGER, "rule watcher config: load: rules ok: {:?}\n", rules);
+        uslib::trace!(
+            uslib::LOGGER,
+            "rule watcher config: load: rules ok: {:?}\n",
+            rules
+        );
         Ok(Self { rules })
     }
 }
@@ -134,7 +162,11 @@ impl RuleWatcher {
         let rule_watcher = RULE_WATCHER.get().unwrap().lock();
         let mut hw = rule_watcher.hw.borrow_mut();
         for rule in rule_watcher.config.rules.as_slice() {
-            uslib::trace!(uslib::LOGGER, "rule watcher: start: watching rule {:?}\n", rule);
+            uslib::trace!(
+                uslib::LOGGER,
+                "rule watcher: start: watching rule {:?}\n",
+                rule
+            );
             let path: &PathBuf = &rule.into();
             hw.watch(path, Self::handle_event)?
         }
@@ -150,7 +182,11 @@ impl RuleWatcher {
         let rule_watcher = RULE_WATCHER.get().unwrap().lock();
         let mut hw = rule_watcher.hw.borrow_mut();
         for rule in rule_watcher.config.rules.as_slice() {
-            uslib::trace!(uslib::LOGGER, "rule watcher: stop: watching rule {:?}\n", rule);
+            uslib::trace!(
+                uslib::LOGGER,
+                "rule watcher: stop: watching rule {:?}\n",
+                rule
+            );
             let path: &PathBuf = &rule.into();
             hw.unwatch(path)?
         }
@@ -188,11 +224,19 @@ impl RuleWatcher {
                 );
             }
             _ => {
-                uslib::debug!(uslib::LOGGER, "rule watcher: handle event: received other event: {:?}\n", event);
+                uslib::debug!(
+                    uslib::LOGGER,
+                    "rule watcher: handle event: received other event: {:?}\n",
+                    event
+                );
             }
         }
         if let Some(val) = rule {
-            uslib::info!(uslib::LOGGER, "rule watcher: handle event: received meaningful event: {}\n", val.0.as_str());
+            uslib::info!(
+                uslib::LOGGER,
+                "rule watcher: handle event: received meaningful event: {}\n",
+                val.0.as_str()
+            );
             let mut client = ASBOT_CLIENT.get().unwrap().lock();
             let mevents = &mut client.mevents_client;
             if let Err(e) = mevents.notify(NotifyRequest {}).await {

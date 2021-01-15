@@ -12,4 +12,5 @@ tokio = { version = "0.2", features = ["full"] }
 
 [dependencies.serenity]
 version = "0.10.2"
-features = ["cache", "framework", "standard_framework", "rustls_tokio_0_2_backend"]
+default-features = false
+features = ["cache", "framework", "standard_framework", "default_tokio_0_2"]

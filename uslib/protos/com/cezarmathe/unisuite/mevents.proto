@@ -5,7 +5,9 @@ syntax = "proto3";
 package com.cezarmathe.unisuite;
 
 // Information about the notification that should be pushed.
-message NotifyRequest {}
+message NotifyRequest {
+    string rule = 1;
+}
 
 // Response that acknowledges the outcome of the notification operation.
 message NotifyResponse {}

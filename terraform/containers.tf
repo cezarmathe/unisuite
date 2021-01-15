@@ -71,6 +71,7 @@ resource "docker_container" "watchman" {
   image = local.watchman_image
 
   env = [
+    "WATCHMAN_ASBOT_ADDRESS=http://${docker_container.asbot.network_data[0].ip_address}:${random_integer.asbot_grpc_port.result}",
     "WATCHMAN_RULES=${join(",", var.usscraper_rules)}",
     "SYSLOG=${docker_container.syslog.network_data[0].ip_address}:514",
     "LOG_LEVEL=${var.watchman_log_level != "" ? var.watchman_log_level : var.log_level}",
@@ -98,6 +99,7 @@ resource "docker_container" "asbot" {
   env = [
     "SYSLOG=${docker_container.syslog.network_data[0].ip_address}:514",
     "LOG_LEVEL=${var.asbot_log_level != "" ? var.asbot_log_level : var.log_level}",
+    "ASBOT_GRPC_PORT=${random_integer.asbot_grpc_port.result}",
   ]
 
   networks_advanced {

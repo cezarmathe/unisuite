@@ -23,12 +23,16 @@ Vagrant.configure("2") do |config|
       apk add "docker>18.09.8-r0" \
           "docker-openrc>18.09.8-r0" \
           docker-volume-local-persist \
-          docker-volume-local-persist-openrc
+          docker-volume-local-persist-openrc \
+          bind-tools \
+          dnsmasq
 
       rc-update add docker
       rc-update add docker-volume-local-persist
+      rc-update add dnsmasq
       rc-service docker start
       rc-service docker-volume-local-persist start
+      rc-update dnsmasq start
 
       adduser vagrant docker
 

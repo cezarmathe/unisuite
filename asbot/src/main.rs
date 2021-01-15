@@ -39,7 +39,10 @@ async fn main() {
         .recv()
         .await
         .unwrap();
-    uslib::debug!(uslib::LOGGER, "main: received termination signal, proceeding with graceful shutdown\n");
+    uslib::debug!(
+        uslib::LOGGER,
+        "main: received termination signal, proceeding with graceful shutdown\n"
+    );
 
     // graceful shutdown
     uslib::debug!(uslib::LOGGER, "main: stopping grpc server\n");

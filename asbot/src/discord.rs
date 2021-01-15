@@ -29,10 +29,7 @@ impl DiscordBot {
         let config = BotConfig::load().await?;
 
         uslib::trace!(uslib::LOGGER, "discord bot: init: setting up singleton\n");
-        if DISCORD_BOT
-            .set(Mutex::new(DiscordBot {}))
-            .is_err()
-        {
+        if DISCORD_BOT.set(Mutex::new(DiscordBot {})).is_err() {
             uslib::bail!("discord bot: init: already initialized\n");
         };
         uslib::trace!(uslib::LOGGER, "discord bot: init: singleton ok\n");

@@ -7,10 +7,10 @@ use uslib::proto::moodle_events_server::MoodleEvents;
 use uslib::proto::moodle_events_server::MoodleEventsServer;
 use uslib::proto::NotifyRequest;
 use uslib::proto::NotifyResponse;
+use uslib::tonic::transport::Server;
 use uslib::tonic::Request;
 use uslib::tonic::Response;
 use uslib::tonic::Status;
-use uslib::tonic::transport::Server;
 
 /// gRPC server.
 pub static SERVER: uslib::OnceCell<Mutex<GrpcServer>> = uslib::OnceCell::new();
@@ -46,7 +46,10 @@ impl GrpcServer {
 
         uslib::trace!(uslib::LOGGER, "grpc server: init: setting up singleton\n");
         if SERVER
-            .set(Mutex::new(GrpcServer { inner: RefCell::new(inner), mevents }))
+            .set(Mutex::new(GrpcServer {
+                inner: RefCell::new(inner),
+                mevents,
+            }))
             .is_err()
         {
             uslib::bail!("grpc server: init: already initialized\n");

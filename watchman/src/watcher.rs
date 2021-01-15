@@ -239,7 +239,7 @@ impl RuleWatcher {
             );
             let mut client = ASBOT_CLIENT.get().unwrap().lock();
             let mevents = &mut client.mevents_client;
-            if let Err(e) = mevents.notify(NotifyRequest {}).await {
+            if let Err(e) = mevents.notify(NotifyRequest { rule: val.0 }).await {
                 uslib::error!(uslib::LOGGER, "rule watcher: handle event: {}", e);
             }
         }

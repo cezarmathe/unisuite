@@ -19,7 +19,10 @@ impl AsBotClientConfig {
         let address: String;
         match std::env::var("WATCHMAN_ASBOT_ADDRESS") {
             Ok(value) => address = value.to_string(),
-            Err(e) => uslib::bail!("asbot client config: load: WATCHMAN_ASBOT_ADDRESS not found: {}\n", e),
+            Err(e) => uslib::bail!(
+                "asbot client config: load: WATCHMAN_ASBOT_ADDRESS not found: {}\n",
+                e
+            ),
         }
         let config = Self { address };
         uslib::trace!(uslib::LOGGER, "asbot client config: load: {:?}\n", config);

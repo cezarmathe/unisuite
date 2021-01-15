@@ -7,10 +7,6 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+reqwest = { version = "0.11.0", features = ["json"] }
+tokio = { version = "0.2", default_features = false, features = ["full"] }
 uslib = { path = "../uslib" }
-tokio = { version = "0.2", features = ["full"] }
-
-[dependencies.serenity]
-version = "0.10.2"
-default-features = false
-features = ["cache", "framework", "standard_framework", "default_tokio_0_2"]

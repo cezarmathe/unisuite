@@ -13,9 +13,9 @@ async fn main() {
         uslib::crit!(uslib::LOGGER, "main: initializing grpc server: {}\n", e);
         return;
     }
-    uslib::debug!(uslib::LOGGER, "main: initializing discord bot\n");
-    if let Err(e) = discord::DiscordBot::init().await {
-        uslib::crit!(uslib::LOGGER, "main: initializing discord bot: {}\n", e);
+    uslib::debug!(uslib::LOGGER, "main: initializing discord\n");
+    if let Err(e) = discord::Discord::init().await {
+        uslib::crit!(uslib::LOGGER, "main: initializing discord: {}\n", e);
         return;
     }
 
@@ -25,9 +25,9 @@ async fn main() {
         uslib::crit!(uslib::LOGGER, "main: starting grpc server: {}\n", e);
         return;
     }
-    uslib::debug!(uslib::LOGGER, "main: starting discord bot\n");
-    if let Err(e) = discord::DiscordBot::start().await {
-        uslib::crit!(uslib::LOGGER, "main: starting discord bot: {}\n", e);
+    uslib::debug!(uslib::LOGGER, "main: starting discord\n");
+    if let Err(e) = discord::Discord::start().await {
+        uslib::crit!(uslib::LOGGER, "main: starting discord: {}\n", e);
         return;
     }
 
@@ -50,9 +50,9 @@ async fn main() {
         uslib::crit!(uslib::LOGGER, "main: stopping grpc server: {}\n", e);
         return;
     }
-    uslib::debug!(uslib::LOGGER, "main: stopping discord bot\n");
-    if let Err(e) = discord::DiscordBot::stop().await {
-        uslib::crit!(uslib::LOGGER, "main: stopping discord bot: {}\n", e);
+    uslib::debug!(uslib::LOGGER, "main: stopping discord\n");
+    if let Err(e) = discord::Discord::stop().await {
+        uslib::crit!(uslib::LOGGER, "main: stopping discord: {}\n", e);
         return;
     }
 

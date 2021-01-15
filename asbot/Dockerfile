@@ -4,6 +4,7 @@ FROM alpine:latest
 RUN apk add \
         bash \
         dumb-init \
+        openssl \
         su-exec
 
 # Default asbot user and group ids.

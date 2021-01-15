@@ -1,5 +1,7 @@
 //! Adam Smith bot gRPC server.
 
+use crate::discord::DISCORD;
+
 use std::cell::RefCell;
 use std::str::FromStr;
 
@@ -82,7 +84,9 @@ impl GrpcServer {
         let port = server.config.port;
         tokio::spawn(async move {
             uslib::trace!(uslib::LOGGER, "grpc server: start: begin serve\n");
-            router.serve(format!("0.0.0.0:{}", port).parse().unwrap()).await
+            router
+                .serve(format!("0.0.0.0:{}", port).parse().unwrap())
+                .await
         });
 
         uslib::trace!(uslib::LOGGER, "grpc server: start ok\n");
@@ -111,6 +115,11 @@ impl MoodleEvents for MoodleEventsService {
             "grpc server: moodle events: notify: {:?}\n",
             request
         );
+        let discord = DISCORD.get().unwrap().lock();
+        if let Err(e) = discord.send_moodle_update(format!("Change detected: {}", request.get_ref().rule)) {
+            uslib::warn!(uslib::LOGGER, "err {}", e);
+        }
+
         Ok(Response::new(NotifyResponse {}))
     }
 }

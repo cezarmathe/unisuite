@@ -2,7 +2,6 @@
 
 use uslib::parking_lot::Mutex;
 use uslib::proto::moodle_events_client::MoodleEventsClient;
-use uslib::proto::NotifyResponse;
 
 /// Adam Smith bot client.
 pub static CLIENT: uslib::OnceCell<Mutex<AsBotClient>> = uslib::OnceCell::new();

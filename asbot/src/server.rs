@@ -92,7 +92,11 @@ impl MoodleEvents for MoodleEventsService {
         &self,
         request: Request<NotifyRequest>,
     ) -> Result<Response<NotifyResponse>, Status> {
-        uslib::trace!(uslib::LOGGER, "grpc server: moodle events: notify\n");
+        uslib::trace!(
+            uslib::LOGGER,
+            "grpc server: moodle events: notify: {:?}\n",
+            request
+        );
         Ok(Response::new(NotifyResponse {}))
     }
 }

@@ -1,6 +1,7 @@
 //! Adam Smith bot gRPC server.
 
 use std::cell::RefCell;
+use std::str::FromStr;
 
 use uslib::parking_lot::Mutex;
 use uslib::proto::moodle_events_server::MoodleEvents;
@@ -17,13 +18,23 @@ pub static SERVER: uslib::OnceCell<Mutex<GrpcServer>> = uslib::OnceCell::new();
 
 /// Configuration for the gRPC server.
 #[derive(Debug)]
-struct GrpcServerConfig {}
+struct GrpcServerConfig {
+    port: u16,
+}
 
 impl GrpcServerConfig {
     /// Load the grpc server configuration.
     pub async fn load() -> uslib::Result<Self> {
         uslib::debug!(uslib::LOGGER, "grpc server config: load\n");
-        let config = Self {};
+        let port: u16;
+        match std::env::var("ASBOT_GRPC_PORT") {
+            Ok(value) => port = u16::from_str(value.as_str())?,
+            Err(e) => uslib::bail!(
+                "asbot client config: load: ASBOT_GRPC_PORT not found: {}\n",
+                e
+            ),
+        }
+        let config = Self { port };
         uslib::trace!(uslib::LOGGER, "grpc server config: load: {:?}\n", config);
         Ok(config)
     }
@@ -32,6 +43,7 @@ impl GrpcServerConfig {
 #[derive(Debug)]
 pub struct GrpcServer {
     inner: RefCell<Server>,
+    config: GrpcServerConfig,
     mevents: MoodleEventsService,
 }
 
@@ -48,6 +60,7 @@ impl GrpcServer {
         if SERVER
             .set(Mutex::new(GrpcServer {
                 inner: RefCell::new(inner),
+                config,
                 mevents,
             }))
             .is_err()
@@ -66,9 +79,10 @@ impl GrpcServer {
 
         let mut inner = server.inner.borrow_mut();
         let router = inner.add_service(MoodleEventsServer::new(server.mevents.clone()));
-        tokio::spawn(async {
+        let port = server.config.port;
+        tokio::spawn(async move {
             uslib::trace!(uslib::LOGGER, "grpc server: start: begin serve\n");
-            router.serve("0.0.0.0:5555".parse().unwrap()).await
+            router.serve(format!("0.0.0.0:{}", port).parse().unwrap()).await
         });
 
         uslib::trace!(uslib::LOGGER, "grpc server: start ok\n");

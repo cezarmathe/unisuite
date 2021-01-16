@@ -1,7 +1,7 @@
 //! Adam Smith bot client.
 
-use uslib::tokio as tokio;
 use uslib::proto::moodle_events_client::MoodleEventsClient;
+use uslib::tokio;
 
 use tokio::sync::Mutex;
 

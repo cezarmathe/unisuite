@@ -10,8 +10,8 @@ use std::path::PathBuf;
 
 use hotwatch::{Event, Hotwatch};
 
-use uslib::tokio as tokio;
 use uslib::proto::NotifyRequest;
+use uslib::tokio;
 
 use tokio::sync::Mutex;
 

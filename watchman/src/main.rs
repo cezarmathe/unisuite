@@ -3,7 +3,7 @@
 mod asbot_client;
 mod watcher;
 
-use uslib::tokio as tokio;
+use uslib::tokio;
 
 #[tokio::main]
 async fn main() {

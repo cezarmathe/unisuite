@@ -5,15 +5,17 @@ use crate::discord::DISCORD;
 use std::cell::RefCell;
 use std::str::FromStr;
 
-use uslib::parking_lot::Mutex;
 use uslib::proto::moodle_events_server::MoodleEvents;
 use uslib::proto::moodle_events_server::MoodleEventsServer;
 use uslib::proto::NotifyRequest;
 use uslib::proto::NotifyResponse;
+use uslib::tokio;
 use uslib::tonic::transport::Server;
 use uslib::tonic::Request;
 use uslib::tonic::Response;
 use uslib::tonic::Status;
+
+use tokio::sync::Mutex;
 
 /// gRPC server.
 pub static SERVER: uslib::OnceCell<Mutex<GrpcServer>> = uslib::OnceCell::new();
@@ -77,7 +79,7 @@ impl GrpcServer {
 
     pub async fn start() -> uslib::Result<()> {
         uslib::trace!(uslib::LOGGER, "grpc server: start\n");
-        let server = SERVER.get().unwrap().lock();
+        let server = SERVER.get().unwrap().lock().await;
 
         let mut inner = server.inner.borrow_mut();
         let router = inner.add_service(MoodleEventsServer::new(server.mevents.clone()));
@@ -115,8 +117,11 @@ impl MoodleEvents for MoodleEventsService {
             "grpc server: moodle events: notify: {:?}\n",
             request
         );
-        let discord = DISCORD.get().unwrap().lock();
-        if let Err(e) = discord.send_moodle_update(format!("Change detected: {}", request.get_ref().rule)) {
+        let discord = DISCORD.get().unwrap().lock().await;
+        if let Err(e) = discord
+            .execute_moodle_webhook(format!("Change detected: {}", request.get_ref().rule))
+            .await
+        {
             uslib::warn!(uslib::LOGGER, "err {}", e);
         }
 

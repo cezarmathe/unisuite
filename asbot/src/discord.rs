@@ -3,9 +3,12 @@
 use std::collections::HashMap;
 use std::str::FromStr;
 
-use reqwest::Client as HttpClient;
+use serenity::http::Http;
+use serenity::model::webhook::Webhook;
 
-use uslib::parking_lot::Mutex;
+use uslib::tokio;
+
+use tokio::sync::Mutex;
 
 /// discord.
 pub static DISCORD: uslib::OnceCell<Mutex<Discord>> = uslib::OnceCell::new();
@@ -13,6 +16,8 @@ pub static DISCORD: uslib::OnceCell<Mutex<Discord>> = uslib::OnceCell::new();
 /// Configuration for the discord.
 #[derive(Debug)]
 struct DiscordConfig {
+    // discord token,
+    token: String,
     // moodle webhook id
     moodle_webhook_id: u64,
     // moodle webhook token
@@ -23,6 +28,14 @@ impl DiscordConfig {
     /// Load the discord configuration.
     pub async fn load() -> uslib::Result<Self> {
         uslib::debug!(uslib::LOGGER, "discord config: load\n");
+        let token: String;
+        match std::env::var("ASBOT_DISCORD_TOKEN") {
+            Ok(value) => token = value,
+            Err(e) => uslib::bail!(
+                "discord config: load: ASBOT_DISCORD_TOKEN not found: {}\n",
+                e
+            ),
+        }
         let moodle_webhook_id: u64;
         match std::env::var("ASBOT_DISCORD_WEBHOOK_ID") {
             Ok(value) => moodle_webhook_id = u64::from_str(value.as_str())?,
@@ -40,6 +53,7 @@ impl DiscordConfig {
             ),
         }
         let config = Self {
+            token,
             moodle_webhook_id,
             moodle_webhook_token,
         };
@@ -51,7 +65,8 @@ impl DiscordConfig {
 #[derive(Debug)]
 pub struct Discord {
     config: DiscordConfig,
-    http_client: HttpClient,
+    http: Http,
+    moodle_webhook: Webhook,
 }
 
 impl Discord {
@@ -59,13 +74,28 @@ impl Discord {
     pub async fn init() -> uslib::Result<()> {
         uslib::trace!(uslib::LOGGER, "discord: init\n");
         let config = DiscordConfig::load().await?;
-        let http_client = HttpClient::new();
+
+        uslib::trace!(uslib::LOGGER, "discord: init: setting up http client\n");
+        let http = Http::new_with_token(config.token.as_str());
+        uslib::trace!(uslib::LOGGER, "discord: init: setting up moodle webhook\n");
+        let moodle_webhook: Webhook;
+        match http
+            .get_webhook_with_token(
+                config.moodle_webhook_id,
+                config.moodle_webhook_token.as_str(),
+            )
+            .await
+        {
+            Ok(value) => moodle_webhook = value,
+            Err(e) => uslib::bail!("discord: init: setting up moodle webhook: {:?}\n", e),
+        }
 
         uslib::trace!(uslib::LOGGER, "discord: init: setting up singleton\n");
         if DISCORD
             .set(Mutex::new(Discord {
                 config,
-                http_client,
+                http,
+                moodle_webhook,
             }))
             .is_err()
         {
@@ -91,17 +121,20 @@ impl Discord {
         Ok(())
     }
 
-    #[tokio::main]
-    pub async fn send_moodle_update(&self, msg: String) -> uslib::Result<()> {
-        let json = {
-            let mut json = HashMap::new();
-            json.insert("content", msg);
-            json
-        };
-        let req = self.http_client.post(format!("https://discord.com/api/v8/webhooks/{}/{}", self.config.moodle_webhook_id, self.config.moodle_webhook_token).as_str());
-        if let Err(e) = req.json(&json).send().await {
-            uslib::bail!("webhook: send: {}", e);
+    pub async fn execute_moodle_webhook(&self, msg: String) -> uslib::Result<()> {
+        uslib::trace!(uslib::LOGGER, "discord: execute moodle webhook\n");
+
+        if let Err(e) = self
+            .moodle_webhook
+            .execute(&self.http, false, |w| {
+                w.content(msg);
+                w
+            })
+            .await
+        {
+            uslib::bail!("discord: execute moodle webhook: {}\n", e);
         }
+
         Ok(())
     }
 }

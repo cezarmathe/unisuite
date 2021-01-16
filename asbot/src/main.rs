@@ -3,6 +3,8 @@
 mod discord;
 mod server;
 
+use uslib::tokio;
+
 #[tokio::main]
 async fn main() {
     uslib::info!(uslib::LOGGER, "main: hello world\n");

@@ -9,8 +9,8 @@ use slog_syslog::Facility;
 
 // Common dependencies.
 pub use once_cell;
-pub use parking_lot;
 pub use slog;
+pub use tokio;
 pub use tonic;
 
 // Useful re-exports.

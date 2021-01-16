@@ -8,5 +8,5 @@ edition = "2018"
 
 [dependencies]
 hotwatch = "0.4.5"
-tokio = { version = "0.2", features = ["full"] }
+tokio = { version = "1.0.2", default_features = false, features = ["full"] }
 uslib = { path = "../uslib" }

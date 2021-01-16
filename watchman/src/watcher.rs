@@ -10,8 +10,10 @@ use std::path::PathBuf;
 
 use hotwatch::{Event, Hotwatch};
 
-use uslib::parking_lot::Mutex;
+use uslib::tokio as tokio;
 use uslib::proto::NotifyRequest;
+
+use tokio::sync::Mutex;
 
 /// Rule watcher.
 pub static RULE_WATCHER: uslib::OnceCell<Mutex<RuleWatcher>> = uslib::OnceCell::new();
@@ -159,7 +161,7 @@ impl RuleWatcher {
     /// This will start watching all rules.
     pub async fn start() -> uslib::Result<()> {
         uslib::trace!(uslib::LOGGER, "rule watcher: start\n");
-        let rule_watcher = RULE_WATCHER.get().unwrap().lock();
+        let rule_watcher = RULE_WATCHER.get().unwrap().lock().await;
         let mut hw = rule_watcher.hw.borrow_mut();
         for rule in rule_watcher.config.rules.as_slice() {
             uslib::trace!(
@@ -179,7 +181,7 @@ impl RuleWatcher {
     /// This will stop watching all rules.
     pub async fn stop() -> uslib::Result<()> {
         uslib::trace!(uslib::LOGGER, "rule watcher: stop\n");
-        let rule_watcher = RULE_WATCHER.get().unwrap().lock();
+        let rule_watcher = RULE_WATCHER.get().unwrap().lock().await;
         let mut hw = rule_watcher.hw.borrow_mut();
         for rule in rule_watcher.config.rules.as_slice() {
             uslib::trace!(
@@ -237,7 +239,7 @@ impl RuleWatcher {
                 "rule watcher: handle event: received meaningful event: {}\n",
                 val.0.as_str()
             );
-            let mut client = ASBOT_CLIENT.get().unwrap().lock();
+            let mut client = ASBOT_CLIENT.get().unwrap().lock().await;
             let mevents = &mut client.mevents_client;
             if let Err(e) = mevents.notify(NotifyRequest { rule: val.0 }).await {
                 uslib::error!(uslib::LOGGER, "rule watcher: handle event: {}", e);

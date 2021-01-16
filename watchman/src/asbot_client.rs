@@ -1,7 +1,9 @@
 //! Adam Smith bot client.
 
-use uslib::parking_lot::Mutex;
+use uslib::tokio as tokio;
 use uslib::proto::moodle_events_client::MoodleEventsClient;
+
+use tokio::sync::Mutex;
 
 /// Adam Smith bot client.
 pub static CLIENT: uslib::OnceCell<Mutex<AsBotClient>> = uslib::OnceCell::new();

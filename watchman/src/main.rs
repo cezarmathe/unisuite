@@ -3,6 +3,8 @@
 mod asbot_client;
 mod watcher;
 
+use uslib::tokio as tokio;
+
 #[tokio::main]
 async fn main() {
     uslib::info!(uslib::LOGGER, "main: hello world\n");

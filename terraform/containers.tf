@@ -100,6 +100,9 @@ resource "docker_container" "asbot" {
     "SYSLOG=${docker_container.syslog.network_data[0].ip_address}:514",
     "LOG_LEVEL=${var.asbot_log_level != "" ? var.asbot_log_level : var.log_level}",
     "ASBOT_GRPC_PORT=${random_integer.asbot_grpc_port.result}",
+    "ASBOT_DISCORD_TOKEN=${var.asbot_discord_token}",
+    "ASBOT_DISCORD_WEBHOOK_ID=${var.asbot_mevents_webhook_id}",
+    "ASBOT_DISCORD_WEBHOOK_TOKEN=${var.asbot_mevents_webhook_token}",
   ]
 
   networks_advanced {

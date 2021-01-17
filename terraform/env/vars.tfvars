@@ -28,3 +28,7 @@ syslog_data_mountpoint = ""
 # asbot
 asbot_image_version = ""
 asbot_log_level     = ""
+
+asbot_discord_token         = ""
+asbot_mevents_webhook_id    = ""
+asbot_mevents_webhook_token = ""

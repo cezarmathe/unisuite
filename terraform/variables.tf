@@ -91,3 +91,18 @@ variable "asbot_log_level" {
   description = "Adam Smith bot log level."
   default     = ""
 }
+
+variable "asbot_discord_token" {
+  type        = string
+  description = "Adam Smith Discord token."
+}
+
+variable "asbot_mevents_webhook_id" {
+  type        = string
+  description = "Adam Smith mevents webhook id."
+}
+
+variable "asbot_mevents_webhook_token" {
+  type        = string
+  description = "Adam Smith mevents webhook token."
+}

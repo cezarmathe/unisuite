@@ -49,6 +49,7 @@ function moodle_login() {
 
     local req_res
     req_res="$(curl -s -X POST \
+        -A "github.com/cezarmathe/unisuite" \
         -d username="${MOODLE_USERNAME}" \
         -d password="${MOODLE_PASSWORD}" \
         "${MOODLE_BASEURL}/login/token.php?service=${MOODLE_SERVICE_NAME}")"
@@ -75,6 +76,7 @@ function moodle_do() {
 
     local req_res
     req_res="$(curl -s -X POST \
+        -A "github.com/cezarmathe/unisuite" \
         -d wstoken="${MOODLE_API_TOKEN}" \
         -d wsfunction="${function_name}" \
         $(eval moodle_format_req_params "${params}") \

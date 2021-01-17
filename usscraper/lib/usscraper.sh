@@ -2,7 +2,7 @@
 
 # usscraper.sh - general library for usscraper.
 
-USSCRAPER_VERSION="0.1.1"; export USSCRAPER_VERSION
+USSCRAPER_VERSION="0.1.2"; export USSCRAPER_VERSION
 
 # Logging levels.
 LOG_DEBUG="7"; export LOG_DEBUG

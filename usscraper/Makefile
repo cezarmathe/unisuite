@@ -1,7 +1,7 @@
 # scraper makefile
 
 TAG = cezarmathe/usscraper
-VERSION = 0.1.1
+VERSION = 0.1.2
 
 package:
 	docker build \

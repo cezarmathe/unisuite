@@ -1,7 +1,7 @@
 //! Adam Smith bot component.
 
-use std::collections::HashMap;
 use std::str::FromStr;
+use std::sync::Arc;
 
 use serenity::http::Http;
 use serenity::model::webhook::Webhook;
@@ -67,6 +67,7 @@ pub struct Discord {
     config: DiscordConfig,
     http: Http,
     moodle_webhook: Webhook,
+    // http_client: HttpClient,
 }
 
 impl Discord {
@@ -76,7 +77,10 @@ impl Discord {
         let config = DiscordConfig::load().await?;
 
         uslib::trace!(uslib::LOGGER, "discord: init: setting up http client\n");
-        let http = Http::new_with_token(config.token.as_str());
+        let http = Http::new(
+            Arc::new(uslib::reqwest::Client::builder().trust_dns(true).build()?),
+            config.token.as_str(),
+        );
         uslib::trace!(uslib::LOGGER, "discord: init: setting up moodle webhook\n");
         let moodle_webhook: Webhook;
         match http
@@ -135,6 +139,7 @@ impl Discord {
             uslib::bail!("discord: execute moodle webhook: {}\n", e);
         }
 
+        uslib::trace!(uslib::LOGGER, "discord: execute moodle webhook: ok\n");
         Ok(())
     }
 }

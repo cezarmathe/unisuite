@@ -1,5 +1,7 @@
 //! Unisuite library.
 
+mod blockz;
+
 use once_cell::sync::Lazy;
 
 use slog::Drain;

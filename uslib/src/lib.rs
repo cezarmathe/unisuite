@@ -1,6 +1,7 @@
 //! Unisuite library.
 
-mod blockz;
+#[macro_use]
+pub mod blockz;
 
 use once_cell::sync::Lazy;
 

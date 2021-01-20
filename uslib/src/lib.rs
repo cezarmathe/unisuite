@@ -1,8 +1,5 @@
 //! Unisuite library.
 
-#[macro_use]
-pub mod blockz;
-
 use once_cell::sync::Lazy;
 
 use slog::Drain;
@@ -11,6 +8,8 @@ use slog::Logger;
 use slog_syslog::Facility;
 
 // Common dependencies.
+pub use anyhow;
+pub use blockz;
 pub use once_cell;
 pub use reqwest;
 pub use slog;
@@ -28,7 +27,10 @@ pub use slog::error;
 pub use slog::info;
 pub use slog::trace;
 pub use slog::warn;
-pub use tonic::async_trait;
+
+pub mod async_trait {
+    pub use tonic::async_trait;
+}
 
 pub mod proto {
     tonic::include_proto!("com.cezarmathe.unisuite");

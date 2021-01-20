@@ -229,7 +229,9 @@ impl RuleWatcher {
                 "rule watcher: handle event: received meaningful event: {}\n",
                 val.0.as_str()
             );
-            if let Err(e) = AsBotClient::use_mut_singleton_with_arg(AsBotClient::notify, val.0).await {
+            if let Err(e) =
+                AsBotClient::use_mut_singleton_with_arg(AsBotClient::notify, val.0).await
+            {
                 uslib::error!(uslib::LOGGER, "rule watcher: handle event: {}", e);
             }
         }

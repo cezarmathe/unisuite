@@ -1,8 +1,7 @@
 //! File watcher.
 
-use crate::asbot_client::CLIENT as ASBOT_CLIENT;
+use crate::asbot_client::AsBotClient;
 
-use std::cell::RefCell;
 use std::convert::TryFrom;
 use std::path::Component;
 use std::path::Path;
@@ -10,13 +9,7 @@ use std::path::PathBuf;
 
 use hotwatch::{Event, Hotwatch};
 
-use uslib::proto::NotifyRequest;
-use uslib::tokio;
-
-use tokio::sync::Mutex;
-
-/// Rule watcher.
-pub static RULE_WATCHER: uslib::OnceCell<Mutex<RuleWatcher>> = uslib::OnceCell::new();
+use uslib::blockz_prelude::*;
 
 /// A wrapper around a scraper rule.
 #[derive(Debug)]
@@ -95,6 +88,7 @@ impl Into<PathBuf> for &ScraperRule {
 }
 
 /// Configuration for the Rule Watcher.
+#[derive(Debug)]
 struct RuleWatcherConfig {
     rules: Vec<ScraperRule>,
 }
@@ -129,9 +123,10 @@ impl RuleWatcherConfig {
 }
 
 /// The rule watcher.
+#[derive(Debug, Singleton)]
 pub struct RuleWatcher {
     config: RuleWatcherConfig,
-    hw: RefCell<Hotwatch>,
+    hw: Hotwatch,
 }
 
 impl RuleWatcher {
@@ -141,14 +136,13 @@ impl RuleWatcher {
         let config = RuleWatcherConfig::load().await?;
 
         uslib::trace!(uslib::LOGGER, "rule watcher: init: setting up singleton\n");
-        if RULE_WATCHER
-            .set(Mutex::new(RuleWatcher {
-                config,
-                hw: RefCell::new(Hotwatch::new()?),
-            }))
-            .is_err()
-        {
-            uslib::bail!("rule watcher: failed to init: already initialized\n");
+
+        let rule_watcher = Self {
+            config,
+            hw: Hotwatch::new()?,
+        };
+        if let Err(e) = Self::init_singleton(rule_watcher) {
+            uslib::bail!("asbot client: init: {}\n", e);
         };
         uslib::trace!(uslib::LOGGER, "rule watcher: init: singleton ok\n");
 
@@ -159,18 +153,16 @@ impl RuleWatcher {
     /// Start the rule watcher.
     ///
     /// This will start watching all rules.
-    pub async fn start() -> uslib::Result<()> {
+    pub async fn start(&mut self) -> uslib::Result<()> {
         uslib::trace!(uslib::LOGGER, "rule watcher: start\n");
-        let rule_watcher = RULE_WATCHER.get().unwrap().lock().await;
-        let mut hw = rule_watcher.hw.borrow_mut();
-        for rule in rule_watcher.config.rules.as_slice() {
+        for rule in self.config.rules.as_slice() {
             uslib::trace!(
                 uslib::LOGGER,
                 "rule watcher: start: watching rule {:?}\n",
                 rule
             );
             let path: &PathBuf = &rule.into();
-            hw.watch(path, Self::handle_event)?
+            self.hw.watch(path, Self::handle_event)?
         }
         uslib::trace!(uslib::LOGGER, "rule watcher: start ok\n");
         Ok(())
@@ -179,18 +171,16 @@ impl RuleWatcher {
     /// Stop the rule watcher.
     ///
     /// This will stop watching all rules.
-    pub async fn stop() -> uslib::Result<()> {
+    pub async fn stop(&mut self) -> uslib::Result<()> {
         uslib::trace!(uslib::LOGGER, "rule watcher: stop\n");
-        let rule_watcher = RULE_WATCHER.get().unwrap().lock().await;
-        let mut hw = rule_watcher.hw.borrow_mut();
-        for rule in rule_watcher.config.rules.as_slice() {
+        for rule in self.config.rules.as_slice() {
             uslib::trace!(
                 uslib::LOGGER,
                 "rule watcher: stop: watching rule {:?}\n",
                 rule
             );
             let path: &PathBuf = &rule.into();
-            hw.unwatch(path)?
+            self.hw.unwatch(path)?
         }
         uslib::trace!(uslib::LOGGER, "rule watcher: stop ok\n");
         Ok(())
@@ -239,9 +229,7 @@ impl RuleWatcher {
                 "rule watcher: handle event: received meaningful event: {}\n",
                 val.0.as_str()
             );
-            let mut client = ASBOT_CLIENT.get().unwrap().lock().await;
-            let mevents = &mut client.mevents_client;
-            if let Err(e) = mevents.notify(NotifyRequest { rule: val.0 }).await {
+            if let Err(e) = AsBotClient::use_mut_singleton_with_arg(AsBotClient::notify, val.0).await {
                 uslib::error!(uslib::LOGGER, "rule watcher: handle event: {}", e);
             }
         }

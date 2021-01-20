@@ -1,9 +1,17 @@
 //! Watchman
 
+#[macro_use]
+extern crate uslib;
+
 mod asbot_client;
 mod watcher;
 
+use asbot_client::AsBotClient;
+
 use uslib::tokio;
+use uslib::Singleton;
+
+use watcher::RuleWatcher;
 
 #[tokio::main]
 async fn main() {
@@ -12,24 +20,22 @@ async fn main() {
     // initialization
 
     uslib::debug!(uslib::LOGGER, "main: initializing asbot client\n");
-    if let Err(e) = asbot_client::AsBotClient::init().await {
+    if let Err(e) = AsBotClient::init().await {
         uslib::crit!(uslib::LOGGER, "main: initializing asbot client: {}\n", e);
         return;
     }
     uslib::debug!(uslib::LOGGER, "main: initializing rule watcher\n");
-    if let Err(e) = watcher::RuleWatcher::init().await {
+    if let Err(e) = RuleWatcher::init().await {
         uslib::crit!(uslib::LOGGER, "main: initializing rule watcher: {}\n", e);
         return;
     }
 
     // start
 
-    {
-        uslib::debug!(uslib::LOGGER, "main: starting rule watcher\n");
-        if let Err(e) = watcher::RuleWatcher::start().await {
-            uslib::crit!(uslib::LOGGER, "main: starting rule watcher: {}\n", e);
-            return;
-        }
+    uslib::debug!(uslib::LOGGER, "main: starting rule watcher\n");
+    if let Err(e) = RuleWatcher::use_mut_singleton(RuleWatcher::start).await {
+        uslib::crit!(uslib::LOGGER, "main: starting rule watcher: {}\n", e);
+        return;
     }
 
     // wait for termination
@@ -47,12 +53,10 @@ async fn main() {
 
     // graceful shutdown
 
-    {
-        uslib::debug!(uslib::LOGGER, "main: stopping rule watcher\n");
-        if let Err(e) = watcher::RuleWatcher::stop().await {
-            uslib::error!(uslib::LOGGER, "main: stopping rule watcher: {}\n", e);
-            return;
-        }
+    uslib::debug!(uslib::LOGGER, "main: stopping rule watcher\n");
+    if let Err(e) = RuleWatcher::use_mut_singleton(RuleWatcher::stop).await {
+        uslib::error!(uslib::LOGGER, "main: stopping rule watcher: {}\n", e);
+        return;
     }
 
     // done

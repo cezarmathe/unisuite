@@ -1,5 +1,10 @@
 //! Unisuite library.
 
+#[allow(unused_imports)]
+#[macro_use]
+pub extern crate blockz;
+pub use blockz::*;
+
 use once_cell::sync::Lazy;
 
 use slog::Drain;
@@ -9,7 +14,6 @@ use slog_syslog::Facility;
 
 // Common dependencies.
 pub use anyhow;
-pub use blockz;
 pub use once_cell;
 pub use reqwest;
 pub use slog;
@@ -28,10 +32,22 @@ pub use slog::info;
 pub use slog::trace;
 pub use slog::warn;
 
+/// Proper re-export of the async_trait crate.
 pub mod async_trait {
     pub use tonic::async_trait;
 }
 
+/// Useful container for all required imports for using blockz.
+pub mod blockz_prelude {
+    pub use crate::anyhow;
+    pub use crate::async_trait;
+    pub use crate::blockz;
+    pub use crate::blockz::singleton::Singleton;
+    pub use crate::once_cell;
+    pub use crate::tokio;
+}
+
+/// Protobuf definitions.
 pub mod proto {
     tonic::include_proto!("com.cezarmathe.unisuite");
 }

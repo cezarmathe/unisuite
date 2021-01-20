@@ -6,12 +6,7 @@ use std::sync::Arc;
 use serenity::http::Http;
 use serenity::model::webhook::Webhook;
 
-use uslib::tokio;
-
-use tokio::sync::Mutex;
-
-/// discord.
-pub static DISCORD: uslib::OnceCell<Mutex<Discord>> = uslib::OnceCell::new();
+use uslib::blockz_prelude::*;
 
 /// Configuration for the discord.
 #[derive(Debug)]
@@ -62,7 +57,7 @@ impl DiscordConfig {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Singleton)]
 pub struct Discord {
     config: DiscordConfig,
     http: Http,
@@ -95,15 +90,13 @@ impl Discord {
         }
 
         uslib::trace!(uslib::LOGGER, "discord: init: setting up singleton\n");
-        if DISCORD
-            .set(Mutex::new(Discord {
-                config,
-                http,
-                moodle_webhook,
-            }))
-            .is_err()
-        {
-            uslib::bail!("discord: init: already initialized\n");
+        let discord = Self {
+            config,
+            http,
+            moodle_webhook,
+        };
+        if let Err(e) = Self::init_singleton(discord) {
+            uslib::bail!("discord: init: {}\n", e);
         };
         uslib::trace!(uslib::LOGGER, "discord: init: singleton ok\n");
 
@@ -111,16 +104,14 @@ impl Discord {
         Ok(())
     }
 
-    pub async fn start() -> uslib::Result<()> {
+    pub async fn start(&mut self) -> uslib::Result<()> {
         uslib::trace!(uslib::LOGGER, "discord: start\n");
-        let server = DISCORD.get().unwrap().lock();
         uslib::trace!(uslib::LOGGER, "discord: start ok\n");
         Ok(())
     }
 
-    pub async fn stop() -> uslib::Result<()> {
+    pub async fn stop(&mut self) -> uslib::Result<()> {
         uslib::trace!(uslib::LOGGER, "discord: stop\n");
-        let server = DISCORD.get().unwrap().lock();
         uslib::trace!(uslib::LOGGER, "discord: stop ok\n");
         Ok(())
     }

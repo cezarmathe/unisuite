@@ -1,24 +1,18 @@
 //! Adam Smith bot gRPC server.
 
-use crate::discord::DISCORD;
+use crate::discord::Discord;
 
-use std::cell::RefCell;
 use std::str::FromStr;
 
+use uslib::blockz_prelude::*;
 use uslib::proto::moodle_events_server::MoodleEvents;
 use uslib::proto::moodle_events_server::MoodleEventsServer;
 use uslib::proto::NotifyRequest;
 use uslib::proto::NotifyResponse;
-use uslib::tokio;
 use uslib::tonic::transport::Server;
 use uslib::tonic::Request;
 use uslib::tonic::Response;
 use uslib::tonic::Status;
-
-use tokio::sync::Mutex;
-
-/// gRPC server.
-pub static SERVER: uslib::OnceCell<Mutex<GrpcServer>> = uslib::OnceCell::new();
 
 /// Configuration for the gRPC server.
 #[derive(Debug)]
@@ -44,9 +38,9 @@ impl GrpcServerConfig {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Singleton)]
 pub struct GrpcServer {
-    inner: RefCell<Server>,
+    inner: Server,
     config: GrpcServerConfig,
     mevents: MoodleEventsService,
 }
@@ -61,15 +55,13 @@ impl GrpcServer {
         let mevents = MoodleEventsService;
 
         uslib::trace!(uslib::LOGGER, "grpc server: init: setting up singleton\n");
-        if SERVER
-            .set(Mutex::new(GrpcServer {
-                inner: RefCell::new(inner),
-                config,
-                mevents,
-            }))
-            .is_err()
-        {
-            uslib::bail!("grpc server: init: already initialized\n");
+        let grpc_server = Self {
+            inner,
+            config,
+            mevents,
+        };
+        if let Err(e) = Self::init_singleton(grpc_server) {
+            uslib::bail!("grpc server: init: {}\n", e);
         };
         uslib::trace!(uslib::LOGGER, "grpc server: init: singleton ok\n");
 
@@ -77,13 +69,13 @@ impl GrpcServer {
         Ok(())
     }
 
-    pub async fn start() -> uslib::Result<()> {
+    pub async fn start(&mut self) -> uslib::Result<()> {
         uslib::trace!(uslib::LOGGER, "grpc server: start\n");
-        let server = SERVER.get().unwrap().lock().await;
 
-        let mut inner = server.inner.borrow_mut();
-        let router = inner.add_service(MoodleEventsServer::new(server.mevents.clone()));
-        let port = server.config.port;
+        let router = self
+            .inner
+            .add_service(MoodleEventsServer::new(self.mevents.clone()));
+        let port = self.config.port;
         tokio::spawn(async move {
             uslib::trace!(uslib::LOGGER, "grpc server: start: begin serve\n");
             router
@@ -95,9 +87,8 @@ impl GrpcServer {
         Ok(())
     }
 
-    pub async fn stop() -> uslib::Result<()> {
+    pub async fn stop(&mut self) -> uslib::Result<()> {
         uslib::trace!(uslib::LOGGER, "grpc server: stop\n");
-        let server = SERVER.get().unwrap().lock();
         uslib::trace!(uslib::LOGGER, "grpc server: stop ok\n");
         Ok(())
     }
@@ -106,7 +97,7 @@ impl GrpcServer {
 #[derive(Clone, Debug)]
 struct MoodleEventsService;
 
-#[uslib::async_trait]
+#[async_trait::async_trait]
 impl MoodleEvents for MoodleEventsService {
     async fn notify(
         &self,
@@ -117,12 +108,13 @@ impl MoodleEvents for MoodleEventsService {
             "grpc server: moodle events: notify: {:?}\n",
             request
         );
-        let discord = DISCORD.get().unwrap().lock().await;
-        if let Err(e) = discord
-            .execute_moodle_webhook(format!("Change detected: {}", request.get_ref().rule))
-            .await
+        if let Err(e) = Discord::use_singleton_with_arg(
+            Discord::execute_moodle_webhook,
+            format!("Change detected: {}", request.get_ref().rule),
+        )
+        .await
         {
-            uslib::warn!(uslib::LOGGER, "err {}", e);
+            uslib::warn!(uslib::LOGGER, "grpc server: moodle events: notify: {}", e);
         }
 
         Ok(Response::new(NotifyResponse {}))

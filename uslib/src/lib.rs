@@ -17,7 +17,7 @@ pub mod common {
     pub use anyhow;
     pub use crate::async_trait;
     pub use blockz;
-    pub use blockz::*;
+    pub use blockz::blockz_derive::*;
     pub use config;
     pub use once_cell;
     pub use crate::proto;

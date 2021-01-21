@@ -2,16 +2,17 @@
 
 use uslib::common::*;
 
-use std::str::FromStr;
 use std::sync::Arc;
 
 use blockz::prelude::*;
+
+use serde::Deserialize;
 
 use serenity::http::Http;
 use serenity::model::webhook::Webhook;
 
 /// Configuration for the discord.
-#[derive(Debug)]
+#[derive(Configuration, Debug, Deserialize)]
 struct DiscordConfig {
     // discord token,
     token: String,
@@ -19,44 +20,6 @@ struct DiscordConfig {
     moodle_webhook_id: u64,
     // moodle webhook token
     moodle_webhook_token: String,
-}
-
-impl DiscordConfig {
-    /// Load the discord configuration.
-    pub async fn load() -> anyhow::Result<Self> {
-        slog::debug!(uslib::LOGGER, "discord config: load\n");
-        let token: String;
-        match std::env::var("ASBOT_DISCORD_TOKEN") {
-            Ok(value) => token = value,
-            Err(e) => anyhow::bail!(
-                "discord config: load: ASBOT_DISCORD_TOKEN not found: {}\n",
-                e
-            ),
-        }
-        let moodle_webhook_id: u64;
-        match std::env::var("ASBOT_DISCORD_WEBHOOK_ID") {
-            Ok(value) => moodle_webhook_id = u64::from_str(value.as_str())?,
-            Err(e) => anyhow::bail!(
-                "discord config: load: ASBOT_DISCORD_WEBHOOK_ID not found: {}\n",
-                e
-            ),
-        }
-        let moodle_webhook_token: String;
-        match std::env::var("ASBOT_DISCORD_WEBHOOK_TOKEN") {
-            Ok(value) => moodle_webhook_token = value,
-            Err(e) => anyhow::bail!(
-                "discord config: load: ASBOT_DISCORD_WEBHOOK_TOKEN not found: {}\n",
-                e
-            ),
-        }
-        let config = Self {
-            token,
-            moodle_webhook_id,
-            moodle_webhook_token,
-        };
-        slog::trace!(uslib::LOGGER, "discord config: load: {:?}\n", config);
-        Ok(config)
-    }
 }
 
 #[derive(Debug, Singleton)]

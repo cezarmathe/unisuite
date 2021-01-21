@@ -8,4 +8,10 @@ edition = "2018"
 
 [dependencies]
 hotwatch = "0.4.5"
-uslib = { path = "../uslib" }
+
+[dependencies.serde]
+version = "1.0.120"
+features = ["derive"]
+
+[dependencies.uslib]
+path = "../uslib"

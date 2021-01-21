@@ -7,16 +7,37 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.38"
-blockz = { git = "https://github.com/selftechio/blockz.git" }
-hostname = "0.3.1"
-once_cell = "1.5.2"
-prost = "0.7.0"
-reqwest = { version = "0.11.0", default_features = false, features = ["json", "rustls-tls", "trust-dns"] }
-slog = { version = "2.7.0", features = ["max_level_trace", "release_max_level_info"] }
+anyhow      = "1.0.38"
+hostname    = "0.3.1"
+once_cell   = "1.5.2"
+prost       = "0.7.0"
 slog-syslog = "0.12.0"
-tokio = { version = "1.0.2", default_features = false, features = ["full"] }
-tonic = { version = "0.4.0", features = ["tls"] }
+
+[dependencies.blockz]
+git      = "https://github.com/selftechio/blockz.git"
+features = ["no_absolute_paths"]
+
+[dependencies.config]
+version          = "0.10.1"
+default_features = false
+
+[dependencies.reqwest]
+version          = "0.11.0"
+default_features = false
+features         = ["json", "rustls-tls", "trust-dns"]
+
+[dependencies.slog]
+version  = "2.7.0"
+features = ["max_level_trace", "release_max_level_info"]
+
+[dependencies.tokio]
+version = "1.0.2"
+default_features = false
+features = ["full"]
+
+[dependencies.tonic]
+version  = "0.4.0"
+features = ["tls"]
 
 [build-dependencies]
 tonic-build = { version = "0.4.0", features = ["prost"] }

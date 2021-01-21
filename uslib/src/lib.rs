@@ -1,9 +1,35 @@
 //! Unisuite library.
 
-#[allow(unused_imports)]
-#[macro_use]
-pub extern crate blockz;
-pub use blockz::*;
+/// Proper re-export of the async_trait crate.
+pub mod async_trait {
+    pub use tonic::async_trait;
+}
+
+/// Common dependencies, to be imported as:
+///
+/// ```rust
+/// #[allow(unused_imports)]
+/// pub use uslib::common::*;
+///
+/// at the top of every source file.
+/// ```
+pub mod common {
+    pub use anyhow;
+    pub use crate::async_trait;
+    pub use blockz;
+    pub use config;
+    pub use once_cell;
+    pub use crate::proto;
+    pub use reqwest;
+    pub use slog;
+    pub use tokio;
+    pub use tonic;
+}
+
+/// Protobuf definitions.
+pub mod proto {
+    tonic::include_proto!("com.cezarmathe.unisuite");
+}
 
 use once_cell::sync::Lazy;
 
@@ -12,47 +38,9 @@ use slog::Level;
 use slog::Logger;
 use slog_syslog::Facility;
 
-// Common dependencies.
-pub use anyhow;
-pub use once_cell;
-pub use reqwest;
-pub use slog;
-pub use tokio;
-pub use tonic;
-
-// Useful re-exports.
-pub use anyhow::bail;
-pub use anyhow::Error;
-pub use anyhow::Result;
-pub use once_cell::sync::OnceCell;
-pub use slog::crit;
-pub use slog::debug;
-pub use slog::error;
-pub use slog::info;
-pub use slog::trace;
-pub use slog::warn;
-
-/// Proper re-export of the async_trait crate.
-pub mod async_trait {
-    pub use tonic::async_trait;
-}
-
-/// Useful container for all required imports for using blockz.
-pub mod blockz_prelude {
-    pub use crate::anyhow;
-    pub use crate::async_trait;
-    pub use crate::blockz;
-    pub use crate::blockz::singleton::Singleton;
-    pub use crate::once_cell;
-    pub use crate::tokio;
-}
-
-/// Protobuf definitions.
-pub mod proto {
-    tonic::include_proto!("com.cezarmathe.unisuite");
-}
-
 /// Root logger.
+///
+/// Can be used either as-is, or used in another Lazy context for building a child logger.
 pub static LOGGER: Lazy<Logger> = Lazy::new(|| {
     use std::net::SocketAddr;
     use std::net::ToSocketAddrs;

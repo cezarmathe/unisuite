@@ -1,12 +1,14 @@
 //! Adam Smith bot component.
 
+use uslib::common::*;
+
 use std::str::FromStr;
 use std::sync::Arc;
 
+use blockz::prelude::*;
+
 use serenity::http::Http;
 use serenity::model::webhook::Webhook;
-
-use uslib::blockz_prelude::*;
 
 /// Configuration for the discord.
 #[derive(Debug)]
@@ -21,12 +23,12 @@ struct DiscordConfig {
 
 impl DiscordConfig {
     /// Load the discord configuration.
-    pub async fn load() -> uslib::Result<Self> {
-        uslib::debug!(uslib::LOGGER, "discord config: load\n");
+    pub async fn load() -> anyhow::Result<Self> {
+        slog::debug!(uslib::LOGGER, "discord config: load\n");
         let token: String;
         match std::env::var("ASBOT_DISCORD_TOKEN") {
             Ok(value) => token = value,
-            Err(e) => uslib::bail!(
+            Err(e) => anyhow::bail!(
                 "discord config: load: ASBOT_DISCORD_TOKEN not found: {}\n",
                 e
             ),
@@ -34,7 +36,7 @@ impl DiscordConfig {
         let moodle_webhook_id: u64;
         match std::env::var("ASBOT_DISCORD_WEBHOOK_ID") {
             Ok(value) => moodle_webhook_id = u64::from_str(value.as_str())?,
-            Err(e) => uslib::bail!(
+            Err(e) => anyhow::bail!(
                 "discord config: load: ASBOT_DISCORD_WEBHOOK_ID not found: {}\n",
                 e
             ),
@@ -42,7 +44,7 @@ impl DiscordConfig {
         let moodle_webhook_token: String;
         match std::env::var("ASBOT_DISCORD_WEBHOOK_TOKEN") {
             Ok(value) => moodle_webhook_token = value,
-            Err(e) => uslib::bail!(
+            Err(e) => anyhow::bail!(
                 "discord config: load: ASBOT_DISCORD_WEBHOOK_TOKEN not found: {}\n",
                 e
             ),
@@ -52,7 +54,7 @@ impl DiscordConfig {
             moodle_webhook_id,
             moodle_webhook_token,
         };
-        uslib::trace!(uslib::LOGGER, "discord config: load: {:?}\n", config);
+        slog::trace!(uslib::LOGGER, "discord config: load: {:?}\n", config);
         Ok(config)
     }
 }
@@ -67,16 +69,16 @@ pub struct Discord {
 
 impl Discord {
     /// Initialize the AsBotClient.
-    pub async fn init() -> uslib::Result<()> {
-        uslib::trace!(uslib::LOGGER, "discord: init\n");
+    pub async fn init() -> anyhow::Result<()> {
+        slog::trace!(uslib::LOGGER, "discord: init\n");
         let config = DiscordConfig::load().await?;
 
-        uslib::trace!(uslib::LOGGER, "discord: init: setting up http client\n");
+        slog::trace!(uslib::LOGGER, "discord: init: setting up http client\n");
         let http = Http::new(
-            Arc::new(uslib::reqwest::Client::builder().trust_dns(true).build()?),
+            Arc::new(reqwest::Client::builder().trust_dns(true).build()?),
             config.token.as_str(),
         );
-        uslib::trace!(uslib::LOGGER, "discord: init: setting up moodle webhook\n");
+        slog::trace!(uslib::LOGGER, "discord: init: setting up moodle webhook\n");
         let moodle_webhook: Webhook;
         match http
             .get_webhook_with_token(
@@ -86,38 +88,38 @@ impl Discord {
             .await
         {
             Ok(value) => moodle_webhook = value,
-            Err(e) => uslib::bail!("discord: init: setting up moodle webhook: {:?}\n", e),
+            Err(e) => anyhow::bail!("discord: init: setting up moodle webhook: {:?}\n", e),
         }
 
-        uslib::trace!(uslib::LOGGER, "discord: init: setting up singleton\n");
+        slog::trace!(uslib::LOGGER, "discord: init: setting up singleton\n");
         let discord = Self {
             config,
             http,
             moodle_webhook,
         };
         if let Err(e) = Self::init_singleton(discord) {
-            uslib::bail!("discord: init: {}\n", e);
+            anyhow::bail!("discord: init: {}\n", e);
         };
-        uslib::trace!(uslib::LOGGER, "discord: init: singleton ok\n");
+        slog::trace!(uslib::LOGGER, "discord: init: singleton ok\n");
 
-        uslib::trace!(uslib::LOGGER, "discord: init: ok\n");
+        slog::trace!(uslib::LOGGER, "discord: init: ok\n");
         Ok(())
     }
 
-    pub async fn start(&mut self) -> uslib::Result<()> {
-        uslib::trace!(uslib::LOGGER, "discord: start\n");
-        uslib::trace!(uslib::LOGGER, "discord: start ok\n");
+    pub async fn start(&mut self) -> anyhow::Result<()> {
+        slog::trace!(uslib::LOGGER, "discord: start\n");
+        slog::trace!(uslib::LOGGER, "discord: start ok\n");
         Ok(())
     }
 
-    pub async fn stop(&mut self) -> uslib::Result<()> {
-        uslib::trace!(uslib::LOGGER, "discord: stop\n");
-        uslib::trace!(uslib::LOGGER, "discord: stop ok\n");
+    pub async fn stop(&mut self) -> anyhow::Result<()> {
+        slog::trace!(uslib::LOGGER, "discord: stop\n");
+        slog::trace!(uslib::LOGGER, "discord: stop ok\n");
         Ok(())
     }
 
-    pub async fn execute_moodle_webhook(&self, msg: String) -> uslib::Result<()> {
-        uslib::trace!(uslib::LOGGER, "discord: execute moodle webhook\n");
+    pub async fn execute_moodle_webhook(&self, msg: String) -> anyhow::Result<()> {
+        slog::trace!(uslib::LOGGER, "discord: execute moodle webhook\n");
 
         if let Err(e) = self
             .moodle_webhook
@@ -127,10 +129,10 @@ impl Discord {
             })
             .await
         {
-            uslib::bail!("discord: execute moodle webhook: {}\n", e);
+            anyhow::bail!("discord: execute moodle webhook: {}\n", e);
         }
 
-        uslib::trace!(uslib::LOGGER, "discord: execute moodle webhook: ok\n");
+        slog::trace!(uslib::LOGGER, "discord: execute moodle webhook: ok\n");
         Ok(())
     }
 }

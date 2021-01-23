@@ -11,6 +11,7 @@ anyhow      = "1.0.38"
 hostname    = "0.3.1"
 once_cell   = "1.5.2"
 prost       = "0.7.0"
+serde       = { version = "1.0.120", features = ["derive"] }
 slog-syslog = "0.12.0"
 url         = "2.2.0"
 

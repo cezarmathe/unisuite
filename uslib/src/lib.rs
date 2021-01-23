@@ -25,6 +25,7 @@ pub mod common {
     pub use slog;
     pub use tokio;
     pub use tonic;
+    pub use crate::types;
     pub use url;
 }
 
@@ -32,6 +33,9 @@ pub mod common {
 pub mod proto {
     tonic::include_proto!("com.cezarmathe.unisuite");
 }
+
+/// Common types.
+pub mod types;
 
 use once_cell::sync::Lazy;
 

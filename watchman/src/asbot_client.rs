@@ -2,8 +2,6 @@
 
 use uslib::common::*;
 
-use std::net::SocketAddr;
-
 use blockz::prelude::*;
 
 use proto::moodle_events_client::MoodleEventsClient;
@@ -11,10 +9,12 @@ use proto::NotifyRequest;
 
 use serde::Deserialize;
 
+use types::Url;
+
 /// Configuration for the AsBotClient.
 #[derive(Configuration, Debug, Deserialize)]
 struct AsBotClientConfig {
-    asbot_address: SocketAddr,
+    asbot_address: Url,
 }
 
 /// Adam Smith bot client.
@@ -34,9 +34,10 @@ impl AsBotClient {
         slog::debug!(
             uslib::LOGGER,
             "asbot client: init: connecting to {}\n",
-            config.asbot_address
+            *config.asbot_address
         );
-        match MoodleEventsClient::connect(format!("http://{}", config.asbot_address)).await {
+        let addr: String = config.asbot_address.as_ref().into();
+        match MoodleEventsClient::connect(addr).await {
             Ok(value) => mevents_client = value,
             Err(e) => anyhow::bail!("asbot client: init: {}\n", e),
         }

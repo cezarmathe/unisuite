@@ -25,6 +25,7 @@ pub mod common {
     pub use slog;
     pub use tokio;
     pub use tonic;
+    pub use url;
 }
 
 /// Protobuf definitions.

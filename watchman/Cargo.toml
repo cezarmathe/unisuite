@@ -10,7 +10,7 @@ edition = "2018"
 hotwatch = "0.4.5"
 
 [dependencies.serde]
-version = "1.0.120"
+version  = "1.0.121"
 features = ["derive"]
 
 [dependencies.uslib]

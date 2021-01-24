@@ -10,7 +10,7 @@ edition = "2018"
 serenity = "0.10.2"
 
 [dependencies.serde]
-version  = "1.0.120"
+version  = "1.0.121"
 features = ["derive"]
 
 [dependencies.uslib]

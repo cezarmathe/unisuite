@@ -46,7 +46,7 @@ impl TryInto<SocketAddr> for &Url {
         if let Some(value) = addrs.first() {
             Ok(value.clone())
         } else {
-            anyhow::bail!("")
+            anyhow::bail!("url: try into socket addr: failed")
         }
     }
 }

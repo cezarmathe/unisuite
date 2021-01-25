@@ -13,7 +13,7 @@ use serenity::model::webhook::Webhook;
 
 /// Configuration for the discord.
 #[derive(Configuration, Debug, Deserialize)]
-struct DiscordConfig {
+pub struct DiscordConfig {
     // discord token,
     token: String,
     // moodle webhook id
@@ -27,20 +27,33 @@ pub struct Discord {
     config: DiscordConfig,
     http: Http,
     moodle_webhook: Webhook,
-    // http_client: HttpClient,
 }
 
-impl Discord {
+#[async_trait::async_trait]
+impl<'c, 'p> ComponentExt<'c, 'p> for Discord
+where
+    'p: 'c
+{
+    // component shall be used as a Singleton.
+    type Inner = ();
+
+    type InitParams = DiscordConfig;
+
+    // no start, stop or deinit required.
+    type StartParams = ();
+    type StopParams = ();
+    type DeinitParams = ();
+
     /// Initialize the AsBotClient.
-    pub async fn init() -> anyhow::Result<()> {
+    async fn init(config: Self::InitParams) -> anyhow::Result<Self::Inner> {
         slog::trace!(uslib::LOGGER, "discord: init\n");
-        let config = DiscordConfig::load().await?;
 
         slog::trace!(uslib::LOGGER, "discord: init: setting up http client\n");
         let http = Http::new(
             Arc::new(reqwest::Client::builder().trust_dns(true).build()?),
             config.token.as_str(),
         );
+
         slog::trace!(uslib::LOGGER, "discord: init: setting up moodle webhook\n");
         let moodle_webhook: Webhook;
         match http
@@ -69,18 +82,23 @@ impl Discord {
         Ok(())
     }
 
-    pub async fn start(&mut self) -> anyhow::Result<()> {
-        slog::trace!(uslib::LOGGER, "discord: start\n");
-        slog::trace!(uslib::LOGGER, "discord: start ok\n");
+    async fn start(&'c mut self, _: Self::StartParams) -> anyhow::Result<()> {
+        slog::trace!(uslib::LOGGER, "discord: start: not required\n");
         Ok(())
     }
 
-    pub async fn stop(&mut self) -> anyhow::Result<()> {
-        slog::trace!(uslib::LOGGER, "discord: stop\n");
-        slog::trace!(uslib::LOGGER, "discord: stop ok\n");
+    async fn stop(&'c mut self, _: Self::StopParams) -> anyhow::Result<()> {
+        slog::trace!(uslib::LOGGER, "discord: stop: not required\n");
         Ok(())
     }
 
+    async fn deinit(&'c mut self, _: Self::DeinitParams) -> anyhow::Result<()> {
+        slog::trace!(uslib::LOGGER, "discord: deinit: not required\n");
+        Ok(())
+    }
+}
+
+impl Discord {
     pub async fn execute_moodle_webhook(&self, msg: String) -> anyhow::Result<()> {
         slog::trace!(uslib::LOGGER, "discord: execute moodle webhook\n");
 

@@ -6,10 +6,13 @@ mod server;
 use uslib::common::*;
 
 use discord::Discord;
+use discord::DiscordConfig;
 
 use blockz::prelude::*;
 
 use server::GrpcServer;
+
+const ENV_PREFIX: &str = "ASBOT";
 
 #[tokio::main]
 async fn main() {
@@ -22,7 +25,14 @@ async fn main() {
         return;
     }
     slog::debug!(uslib::LOGGER, "main: initializing discord\n");
-    if let Err(e) = Discord::init().await {
+    let discord_config= match DiscordConfig::load(Some(ENV_PREFIX.to_string())).await {
+        Ok(value) => value,
+        Err(e) => {
+            slog::crit!(uslib::LOGGER, "main: initializing discord config: {}\n", e);
+        return;
+        },
+    };
+    if let Err(e) = Discord::init(discord_config).await {
         slog::crit!(uslib::LOGGER, "main: initializing discord: {}\n", e);
         return;
     }
@@ -34,7 +44,7 @@ async fn main() {
         return;
     }
     slog::debug!(uslib::LOGGER, "main: starting discord\n");
-    if let Err(e) = Discord::use_mut_singleton(Discord::start).await {
+    if let Err(e) = Discord::use_mut_singleton_with_arg(Discord::start, ()).await {
         slog::crit!(uslib::LOGGER, "main: starting discord: {}\n", e);
         return;
     }
@@ -59,7 +69,7 @@ async fn main() {
         return;
     }
     slog::debug!(uslib::LOGGER, "main: stopping discord\n");
-    if let Err(e) = Discord::use_mut_singleton(Discord::stop).await {
+    if let Err(e) = Discord::use_mut_singleton_with_arg(Discord::stop, ()).await {
         slog::crit!(uslib::LOGGER, "main: stopping discord: {}\n", e);
         return;
     }

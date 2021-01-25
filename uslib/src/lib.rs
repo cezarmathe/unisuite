@@ -19,6 +19,7 @@ pub mod common {
     pub use blockz;
     pub use blockz::blockz_derive::*;
     pub use config;
+    pub use envy;
     pub use once_cell;
     pub use crate::proto;
     pub use reqwest;

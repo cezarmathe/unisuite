@@ -11,6 +11,7 @@ use discord::DiscordConfig;
 use blockz::prelude::*;
 
 use server::GrpcServer;
+use server::GrpcServerConfig;
 
 const ENV_PREFIX: &str = "ASBOT";
 
@@ -20,17 +21,25 @@ async fn main() {
 
     // initialization
     slog::debug!(uslib::LOGGER, "main: initializing grpc server\n");
+    let grpc_server_config = match GrpcServerConfig::load(Some(ENV_PREFIX.to_string())).await {
+        Ok(value) => value,
+        Err(e) => {
+            slog::crit!(uslib::LOGGER, "main: initializing grpc server: config: {}\n", e);
+            return;
+        }
+    };
     if let Err(e) = GrpcServer::init().await {
         slog::crit!(uslib::LOGGER, "main: initializing grpc server: {}\n", e);
         return;
     }
+
     slog::debug!(uslib::LOGGER, "main: initializing discord\n");
-    let discord_config= match DiscordConfig::load(Some(ENV_PREFIX.to_string())).await {
+    let discord_config = match DiscordConfig::load(Some(ENV_PREFIX.to_string())).await {
         Ok(value) => value,
         Err(e) => {
-            slog::crit!(uslib::LOGGER, "main: initializing discord config: {}\n", e);
-        return;
-        },
+            slog::crit!(uslib::LOGGER, "main: initializing discord: config: {}\n", e);
+            return;
+        }
     };
     if let Err(e) = Discord::init(discord_config).await {
         slog::crit!(uslib::LOGGER, "main: initializing discord: {}\n", e);
@@ -39,13 +48,8 @@ async fn main() {
 
     // start
     slog::debug!(uslib::LOGGER, "main: starting grpc server\n");
-    if let Err(e) = GrpcServer::use_mut_singleton(GrpcServer::start).await {
+    if let Err(e) = GrpcServer::use_mut_singleton_with_arg(GrpcServer::start, grpc_server_config).await {
         slog::crit!(uslib::LOGGER, "main: starting grpc server: {}\n", e);
-        return;
-    }
-    slog::debug!(uslib::LOGGER, "main: starting discord\n");
-    if let Err(e) = Discord::use_mut_singleton_with_arg(Discord::start, ()).await {
-        slog::crit!(uslib::LOGGER, "main: starting discord: {}\n", e);
         return;
     }
 
@@ -66,11 +70,6 @@ async fn main() {
     slog::debug!(uslib::LOGGER, "main: stopping grpc server\n");
     if let Err(e) = server::GrpcServer::use_mut_singleton(server::GrpcServer::stop).await {
         slog::crit!(uslib::LOGGER, "main: stopping grpc server: {}\n", e);
-        return;
-    }
-    slog::debug!(uslib::LOGGER, "main: stopping discord\n");
-    if let Err(e) = Discord::use_mut_singleton_with_arg(Discord::stop, ()).await {
-        slog::crit!(uslib::LOGGER, "main: stopping discord: {}\n", e);
         return;
     }
 

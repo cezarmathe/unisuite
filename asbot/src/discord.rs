@@ -29,23 +29,9 @@ pub struct Discord {
     moodle_webhook: Webhook,
 }
 
-#[async_trait::async_trait]
-impl<'c, 'p> ComponentExt<'c, 'p> for Discord
-where
-    'p: 'c
-{
-    // component shall be used as a Singleton.
-    type Inner = ();
-
-    type InitParams = DiscordConfig;
-
-    // no start, stop or deinit required.
-    type StartParams = ();
-    type StopParams = ();
-    type DeinitParams = ();
-
+impl Discord {
     /// Initialize the AsBotClient.
-    async fn init(config: Self::InitParams) -> anyhow::Result<Self::Inner> {
+    pub async fn init(config: DiscordConfig) -> anyhow::Result<()> {
         slog::trace!(uslib::LOGGER, "discord: init\n");
 
         slog::trace!(uslib::LOGGER, "discord: init: setting up http client\n");
@@ -79,21 +65,6 @@ where
         slog::trace!(uslib::LOGGER, "discord: init: singleton ok\n");
 
         slog::trace!(uslib::LOGGER, "discord: init: ok\n");
-        Ok(())
-    }
-
-    async fn start(&'c mut self, _: Self::StartParams) -> anyhow::Result<()> {
-        slog::trace!(uslib::LOGGER, "discord: start: not required\n");
-        Ok(())
-    }
-
-    async fn stop(&'c mut self, _: Self::StopParams) -> anyhow::Result<()> {
-        slog::trace!(uslib::LOGGER, "discord: stop: not required\n");
-        Ok(())
-    }
-
-    async fn deinit(&'c mut self, _: Self::DeinitParams) -> anyhow::Result<()> {
-        slog::trace!(uslib::LOGGER, "discord: deinit: not required\n");
         Ok(())
     }
 }

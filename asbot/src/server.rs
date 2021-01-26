@@ -4,8 +4,6 @@ use uslib::common::*;
 
 use crate::discord::Discord;
 
-use std::str::FromStr;
-
 use blockz::prelude::*;
 
 use proto::moodle_events_server::MoodleEvents;
@@ -13,39 +11,22 @@ use proto::moodle_events_server::MoodleEventsServer;
 use proto::NotifyRequest;
 use proto::NotifyResponse;
 
+use serde::Deserialize;
+
 use tonic::transport::Server;
 use tonic::Request;
 use tonic::Response;
 use tonic::Status;
 
 /// Configuration for the gRPC server.
-#[derive(Debug)]
-struct GrpcServerConfig {
+#[derive(Configuration, Debug, Deserialize)]
+pub struct GrpcServerConfig {
     port: u16,
-}
-
-impl GrpcServerConfig {
-    /// Load the grpc server configuration.
-    pub async fn load() -> anyhow::Result<Self> {
-        slog::debug!(uslib::LOGGER, "grpc server config: load\n");
-        let port: u16;
-        match std::env::var("ASBOT_GRPC_PORT") {
-            Ok(value) => port = u16::from_str(value.as_str())?,
-            Err(e) => anyhow::bail!(
-                "asbot client config: load: ASBOT_GRPC_PORT not found: {}\n",
-                e
-            ),
-        }
-        let config = Self { port };
-        slog::trace!(uslib::LOGGER, "grpc server config: load: {:?}\n", config);
-        Ok(config)
-    }
 }
 
 #[derive(Debug, Singleton)]
 pub struct GrpcServer {
     inner: Server,
-    config: GrpcServerConfig,
     mevents: MoodleEventsService,
 }
 
@@ -53,7 +34,6 @@ impl GrpcServer {
     /// Initialize the AsBotClient.
     pub async fn init() -> anyhow::Result<()> {
         slog::trace!(uslib::LOGGER, "grpc server: init\n");
-        let config = GrpcServerConfig::load().await?;
 
         let inner = Server::builder();
         let mevents = MoodleEventsService;
@@ -61,7 +41,6 @@ impl GrpcServer {
         slog::trace!(uslib::LOGGER, "grpc server: init: setting up singleton\n");
         let grpc_server = Self {
             inner,
-            config,
             mevents,
         };
         if let Err(e) = Self::init_singleton(grpc_server) {
@@ -73,13 +52,13 @@ impl GrpcServer {
         Ok(())
     }
 
-    pub async fn start(&mut self) -> anyhow::Result<()> {
+    pub async fn start(&mut self, config: GrpcServerConfig) -> anyhow::Result<()> {
         slog::trace!(uslib::LOGGER, "grpc server: start\n");
 
         let router = self
             .inner
             .add_service(MoodleEventsServer::new(self.mevents.clone()));
-        let port = self.config.port;
+        let port = config.port;
         tokio::spawn(async move {
             slog::trace!(uslib::LOGGER, "grpc server: start: begin serve\n");
             router

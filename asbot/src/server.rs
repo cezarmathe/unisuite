@@ -4,6 +4,10 @@ use uslib::common::*;
 
 use crate::discord::Discord;
 
+use std::convert::TryInto;
+use std::net::SocketAddr;
+use std::sync::Arc;
+
 use blockz::prelude::*;
 
 use proto::moodle_events_server::MoodleEvents;
@@ -13,21 +17,26 @@ use proto::NotifyResponse;
 
 use serde::Deserialize;
 
+use tokio::sync::Notify;
+
 use tonic::transport::Server;
 use tonic::Request;
 use tonic::Response;
 use tonic::Status;
 
+use types::Url;
+
 /// Configuration for the gRPC server.
 #[derive(Configuration, Debug, Deserialize)]
 pub struct GrpcServerConfig {
-    port: u16,
+    address: Url,
 }
 
 #[derive(Debug, Singleton)]
 pub struct GrpcServer {
     inner: Server,
     mevents: MoodleEventsService,
+    shutdown: Arc<Notify>,
 }
 
 impl GrpcServer {
@@ -42,6 +51,7 @@ impl GrpcServer {
         let grpc_server = Self {
             inner,
             mevents,
+            shutdown: Arc::new(Notify::new()),
         };
         if let Err(e) = Self::init_singleton(grpc_server) {
             anyhow::bail!("grpc server: init: {}\n", e);
@@ -58,11 +68,12 @@ impl GrpcServer {
         let router = self
             .inner
             .add_service(MoodleEventsServer::new(self.mevents.clone()));
-        let port = config.port;
+        let sockaddr: SocketAddr = (&config.address).try_into()?;
+        let shutdown = self.shutdown.clone();
         tokio::spawn(async move {
             slog::trace!(uslib::LOGGER, "grpc server: start: begin serve\n");
             router
-                .serve(format!("0.0.0.0:{}", port).parse().unwrap())
+                .serve_with_shutdown(sockaddr, shutdown.notified())
                 .await
         });
 
@@ -72,6 +83,7 @@ impl GrpcServer {
 
     pub async fn stop(&mut self) -> anyhow::Result<()> {
         slog::trace!(uslib::LOGGER, "grpc server: stop\n");
+        self.shutdown.notify_one();
         slog::trace!(uslib::LOGGER, "grpc server: stop ok\n");
         Ok(())
     }

@@ -42,9 +42,7 @@ impl AsBotClient {
         slog::trace!(uslib::LOGGER, "asbot client: init: connection ok\n");
 
         slog::trace!(uslib::LOGGER, "asbot client: init: setting up singleton\n");
-        let asbot_client = Self {
-            mevents_client,
-        };
+        let asbot_client = Self { mevents_client };
         if let Err(e) = Self::init_singleton(asbot_client) {
             anyhow::bail!("asbot client: init: {}\n", e);
         };

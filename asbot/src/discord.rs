@@ -15,10 +15,13 @@ use serenity::model::webhook::Webhook;
 #[derive(Configuration, Debug, Deserialize)]
 pub struct DiscordConfig {
     // discord token,
+    #[serde(rename = "discord_token")]
     token: String,
     // moodle webhook id
+    #[serde(rename = "discord_moodle_webhook_id")]
     moodle_webhook_id: u64,
     // moodle webhook token
+    #[serde(rename = "discord_moodle_webhook_token")]
     moodle_webhook_token: String,
 }
 

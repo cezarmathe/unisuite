@@ -8,6 +8,7 @@ use std::convert::TryFrom;
 use std::path::Component;
 use std::path::Path;
 use std::path::PathBuf;
+use std::sync::Arc;
 
 use hotwatch::Event;
 use hotwatch::Hotwatch;
@@ -94,14 +95,13 @@ impl Into<PathBuf> for &ScraperRule {
 
 /// Configuration for the Rule Watcher.
 #[derive(Configuration, Debug, Deserialize)]
-struct RuleWatcherConfig {
+pub struct RuleWatcherConfig {
     rules: Vec<ScraperRule>,
 }
 
 /// The rule watcher.
 #[derive(Debug, Singleton)]
 pub struct RuleWatcher {
-    config: RuleWatcherConfig,
     hw: Hotwatch,
 }
 
@@ -109,12 +109,9 @@ impl RuleWatcher {
     /// Initialize the rule watcher.
     pub async fn init() -> anyhow::Result<()> {
         slog::trace!(uslib::LOGGER, "rule watcher: init\n");
-        let config = RuleWatcherConfig::load().await?;
 
         slog::trace!(uslib::LOGGER, "rule watcher: init: setting up singleton\n");
-
         let rule_watcher = Self {
-            config,
             hw: Hotwatch::new()?,
         };
         if let Err(e) = Self::init_singleton(rule_watcher) {
@@ -129,9 +126,9 @@ impl RuleWatcher {
     /// Start the rule watcher.
     ///
     /// This will start watching all rules.
-    pub async fn start(&mut self) -> anyhow::Result<()> {
+    pub async fn start(&mut self, config: Arc<RuleWatcherConfig>) -> anyhow::Result<()> {
         slog::trace!(uslib::LOGGER, "rule watcher: start\n");
-        for rule in self.config.rules.as_slice() {
+        for rule in config.rules.as_slice() {
             slog::trace!(
                 uslib::LOGGER,
                 "rule watcher: start: watching rule {:?}\n",
@@ -147,9 +144,9 @@ impl RuleWatcher {
     /// Stop the rule watcher.
     ///
     /// This will stop watching all rules.
-    pub async fn stop(&mut self) -> anyhow::Result<()> {
+    pub async fn stop(&mut self, config: Arc<RuleWatcherConfig>) -> anyhow::Result<()> {
         slog::trace!(uslib::LOGGER, "rule watcher: stop\n");
-        for rule in self.config.rules.as_slice() {
+        for rule in config.rules.as_slice() {
             slog::trace!(
                 uslib::LOGGER,
                 "rule watcher: stop: watching rule {:?}\n",
@@ -161,7 +158,9 @@ impl RuleWatcher {
         slog::trace!(uslib::LOGGER, "rule watcher: stop ok\n");
         Ok(())
     }
+}
 
+impl RuleWatcher {
     #[tokio::main]
     async fn handle_event(event: Event) {
         slog::trace!(uslib::LOGGER, "rule watcher: handle event\n");

@@ -13,22 +13,20 @@ use types::Url;
 
 /// Configuration for the AsBotClient.
 #[derive(Configuration, Debug, Deserialize)]
-struct AsBotClientConfig {
+pub struct AsBotClientConfig {
     asbot_address: Url,
 }
 
 /// Adam Smith bot client.
 #[derive(Debug, Singleton)]
 pub struct AsBotClient {
-    config: AsBotClientConfig,
     mevents_client: MoodleEventsClient<tonic::transport::channel::Channel>,
 }
 
 impl AsBotClient {
     /// Initialize the AsBotClient.
-    pub async fn init() -> anyhow::Result<()> {
+    pub async fn init(config: AsBotClientConfig) -> anyhow::Result<()> {
         slog::trace!(uslib::LOGGER, "asbot client: init\n");
-        let config = AsBotClientConfig::load().await?;
         let mevents_client: MoodleEventsClient<tonic::transport::channel::Channel>;
 
         slog::debug!(
@@ -45,7 +43,6 @@ impl AsBotClient {
 
         slog::trace!(uslib::LOGGER, "asbot client: init: setting up singleton\n");
         let asbot_client = Self {
-            config,
             mevents_client,
         };
         if let Err(e) = Self::init_singleton(asbot_client) {
@@ -56,7 +53,9 @@ impl AsBotClient {
         slog::trace!(uslib::LOGGER, "asbot client: init: ok\n");
         Ok(())
     }
+}
 
+impl AsBotClient {
     /// Send a notify event to the Adam Smith bot.
     pub async fn notify(&mut self, rule: String) -> anyhow::Result<()> {
         if let Err(e) = self.mevents_client.notify(NotifyRequest { rule }).await {

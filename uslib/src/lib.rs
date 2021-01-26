@@ -14,19 +14,19 @@ pub mod async_trait {
 /// at the top of every source file.
 /// ```
 pub mod common {
-    pub use anyhow;
     pub use crate::async_trait;
+    pub use crate::proto;
+    pub use crate::types;
+    pub use anyhow;
     pub use blockz;
     pub use blockz::blockz_derive::*;
     pub use config;
     pub use envy;
     pub use once_cell;
-    pub use crate::proto;
     pub use reqwest;
     pub use slog;
     pub use tokio;
     pub use tonic;
-    pub use crate::types;
     pub use url;
 }
 

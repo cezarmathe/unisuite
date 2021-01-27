@@ -101,8 +101,8 @@ resource "docker_container" "asbot" {
     "LOG_LEVEL=${var.asbot_log_level != "" ? var.asbot_log_level : var.log_level}",
     "ASBOT_ADDRESS=http://0.0.0.0:${random_integer.asbot_grpc_port.result}",
     "ASBOT_DISCORD_TOKEN=${var.asbot_discord_token}",
-    "ASBOT_DISCORD_WEBHOOK_ID=${var.asbot_mevents_webhook_id}",
-    "ASBOT_DISCORD_WEBHOOK_TOKEN=${var.asbot_mevents_webhook_token}",
+    "ASBOT_DISCORD_MOODLE_WEBHOOK_ID=${var.asbot_mevents_webhook_id}",
+    "ASBOT_DISCORD_MOODLE_WEBHOOK_TOKEN=${var.asbot_mevents_webhook_token}",
   ]
 
   networks_advanced {

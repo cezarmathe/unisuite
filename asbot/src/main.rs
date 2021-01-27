@@ -13,7 +13,7 @@ use blockz::prelude::*;
 use server::GrpcServer;
 use server::GrpcServerConfig;
 
-const ENV_PREFIX: &str = "ASBOT";
+const ENV_PREFIX: &str = "ASBOT_";
 
 #[tokio::main]
 async fn main() {

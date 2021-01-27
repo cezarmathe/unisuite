@@ -10,13 +10,13 @@ use serde::Serialize;
 
 /// Url type that can be serialized and deserialized as a string.
 #[derive(Clone, Debug, Deserialize, Serialize)]
-#[serde(try_from = "&str", into = "String")]
+#[serde(try_from = "String", into = "String")]
 pub struct Url(url::Url);
 
-impl TryFrom<&str> for Url {
+impl TryFrom<String> for Url {
     type Error = anyhow::Error;
-    fn try_from(src: &str) -> anyhow::Result<Url> {
-        Ok(Url(url::Url::try_from(src)?))
+    fn try_from(src: String) -> anyhow::Result<Url> {
+        Ok(Url(url::Url::try_from(src.as_ref())?))
     }
 }
 

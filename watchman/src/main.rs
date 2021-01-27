@@ -15,7 +15,7 @@ use blockz::prelude::*;
 use watcher::RuleWatcher;
 use watcher::RuleWatcherConfig;
 
-const ENV_PREFIX: &str = "WATCHMAN";
+const ENV_PREFIX: &str = "WATCHMAN_";
 
 #[tokio::main]
 async fn main() {

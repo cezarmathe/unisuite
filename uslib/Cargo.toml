@@ -19,6 +19,10 @@ url         = "2.2.0"
 git      = "https://github.com/selftechio/blockz.git"
 features = ["no_absolute_paths"]
 
+[dependencies.chrono]
+version  = "0.4.19"
+features = ["serde"]
+
 [dependencies.config]
 version          = "0.10.1"
 default_features = false

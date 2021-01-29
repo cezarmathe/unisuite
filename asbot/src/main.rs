@@ -24,7 +24,11 @@ async fn main() {
     let grpc_server_config = match GrpcServerConfig::load(Some(ENV_PREFIX.to_string())).await {
         Ok(value) => value,
         Err(e) => {
-            slog::crit!(uslib::LOGGER, "main: initializing grpc server: config: {}\n", e);
+            slog::crit!(
+                uslib::LOGGER,
+                "main: initializing grpc server: config: {}\n",
+                e
+            );
             return;
         }
     };
@@ -48,7 +52,9 @@ async fn main() {
 
     // start
     slog::debug!(uslib::LOGGER, "main: starting grpc server\n");
-    if let Err(e) = GrpcServer::use_mut_singleton_with_arg(GrpcServer::start, grpc_server_config).await {
+    if let Err(e) =
+        GrpcServer::use_mut_singleton_with_arg(GrpcServer::start, grpc_server_config).await
+    {
         slog::crit!(uslib::LOGGER, "main: starting grpc server: {}\n", e);
         return;
     }

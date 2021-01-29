@@ -31,6 +31,9 @@ pub mod common {
     pub use url;
 }
 
+/// Models.
+pub mod model;
+
 /// Protobuf definitions.
 pub mod proto {
     tonic::include_proto!("com.cezarmathe.unisuite");

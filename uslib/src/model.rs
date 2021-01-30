@@ -113,6 +113,5 @@ pub struct ResourceContent {
 #[serde(rename_all = "lowercase")]
 pub enum ContentType {
     File,
-
     // fixme 29/01/2021: moodle has more resource types.
 }

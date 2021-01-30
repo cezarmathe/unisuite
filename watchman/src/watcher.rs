@@ -24,13 +24,18 @@ use uslib::model::Topic;
 #[derive(Debug, Deserialize)]
 pub struct ScraperRule {
     name: String,
-    content: Vec<Topic>,
+    content: Option<Vec<Topic>>,
 }
 
 impl ScraperRule {
     /// Create a new ScraperRule.
-    pub fn new(name: String, content: Vec<Topic>) -> Self {
-        Self { name, content }
+    pub fn new(name: String) -> Self {
+        Self { name, content: None }
+    }
+
+    /// Create a new ScraperRule with content.
+    pub fn new_with_content(name: String, content: Vec<Topic>) -> Self {
+        Self { name, content: Some(content) }
     }
 }
 
@@ -105,7 +110,7 @@ impl TryFrom<&Path> for ScraperRule {
             content
         );
 
-        Ok(ScraperRule::new(components[3].to_string(), content))
+        Ok(ScraperRule::new_with_content(components[3].to_string(), content))
     }
 }
 
@@ -128,7 +133,7 @@ impl Into<PathBuf> for &ScraperRule {
 /// Configuration for the Rule Watcher.
 #[derive(Configuration, Debug, Deserialize)]
 pub struct RuleWatcherConfig {
-    rules: Vec<ScraperRule>,
+    rules: Vec<String>,
 }
 
 /// The rule watcher.
@@ -160,13 +165,15 @@ impl RuleWatcher {
     /// This will start watching all rules.
     pub async fn start(&mut self, config: Arc<RuleWatcherConfig>) -> anyhow::Result<()> {
         slog::trace!(uslib::LOGGER, "rule watcher: start\n");
-        for rule in config.rules.as_slice() {
+        for _rule in config.rules.as_slice() {
+            // fixme 30/01/2021: useless clone
+            let rule = ScraperRule::new(_rule.clone());
             slog::trace!(
                 uslib::LOGGER,
                 "rule watcher: start: watching rule {:?}\n",
                 rule
             );
-            let path: &PathBuf = &rule.into();
+            let path: PathBuf = (&rule).into();
             self.hw.watch(path, Self::handle_event)?
         }
         slog::trace!(uslib::LOGGER, "rule watcher: start ok\n");

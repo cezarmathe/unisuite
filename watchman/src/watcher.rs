@@ -5,6 +5,7 @@ use uslib::common::*;
 use crate::asbot_client::AsBotClient;
 
 use std::convert::TryFrom;
+use std::fs::File;
 use std::path::Component;
 use std::path::Path;
 use std::path::PathBuf;
@@ -17,14 +18,19 @@ use blockz::prelude::*;
 
 use serde::Deserialize;
 
+use uslib::model::Topic;
+
 /// A wrapper around a scraper rule.
 #[derive(Debug, Deserialize)]
-pub struct ScraperRule(pub String);
+pub struct ScraperRule {
+    name: String,
+    content: Vec<Topic>,
+}
 
 impl ScraperRule {
     /// Create a new ScraperRule.
-    pub fn new(name: String) -> Self {
-        Self(name)
+    pub fn new(name: String, content: Vec<Topic>) -> Self {
+        Self { name, content }
     }
 }
 
@@ -73,7 +79,33 @@ impl TryFrom<&Path> for ScraperRule {
             "scraper rule: try from path: path encoding ok: {}\n",
             components[3]
         );
-        Ok(ScraperRule(components[3].to_string()))
+
+        let content: Vec<Topic>;
+        {
+            let file = match File::open(src) {
+                Ok(value) => value,
+                Err(e) => anyhow::bail!(
+                    "scraper rule: try from path {}: open data file: {}",
+                    components[3],
+                    e
+                ),
+            };
+            content = match serde_json::from_reader(file) {
+                Ok(value) => value,
+                Err(e) => anyhow::bail!(
+                    "scraper rule: try from path {}: deserialize data file: {}",
+                    components[3],
+                    e
+                ),
+            };
+        }
+        slog::trace!(
+            uslib::LOGGER,
+            "scraper rule: try from path: content ok: {:?}\n",
+            content
+        );
+
+        Ok(ScraperRule::new(components[3].to_string(), content))
     }
 }
 
@@ -82,7 +114,7 @@ impl Into<PathBuf> for &ScraperRule {
         // 80 = 20(/var/usscraper/data/) + 50(rule name length) + 10(/data.json)
         let mut rule_data_path = PathBuf::with_capacity(80);
         rule_data_path.push("/var/usscraper/data");
-        rule_data_path.push(&self.0);
+        rule_data_path.push(self.name.as_str());
         rule_data_path.push("data.json");
         slog::trace!(
             uslib::LOGGER,
@@ -202,10 +234,10 @@ impl RuleWatcher {
             slog::info!(
                 uslib::LOGGER,
                 "rule watcher: handle event: received meaningful event: {}\n",
-                val.0.as_str()
+                val.name.as_str()
             );
             if let Err(e) =
-                AsBotClient::use_mut_singleton_with_arg(AsBotClient::notify, val.0).await
+                AsBotClient::use_mut_singleton_with_arg(AsBotClient::notify, val.name).await
             {
                 slog::error!(uslib::LOGGER, "rule watcher: handle event: {}", e);
             }

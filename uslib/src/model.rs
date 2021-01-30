@@ -84,6 +84,7 @@ impl DerefMut for Url {
 pub struct Resource {
     #[serde(flatten)]
     pub ident: NameUrlContainer,
+    #[serde(rename = "contents")]
     pub content: Vec<ResourceContent>,
 }
 

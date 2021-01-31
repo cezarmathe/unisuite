@@ -25,6 +25,7 @@ pub mod common {
     pub use envy;
     pub use once_cell;
     pub use reqwest;
+    pub use serde_diff;
     pub use serde_json;
     pub use slog;
     pub use tokio;

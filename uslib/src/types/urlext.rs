@@ -8,9 +8,12 @@ use std::ops::Deref;
 use serde::Deserialize;
 use serde::Serialize;
 
+use serde_diff::SerdeDiff;
+
 /// Url type that can be serialized and deserialized as a string.
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, SerdeDiff, Serialize)]
 #[serde(try_from = "String", into = "String")]
+#[serde_diff(opaque)]
 pub struct Url(url::Url);
 
 impl TryFrom<String> for Url {
@@ -48,5 +51,11 @@ impl TryInto<SocketAddr> for &Url {
         } else {
             anyhow::bail!("url: try into socket addr: failed")
         }
+    }
+}
+
+impl PartialEq for Url {
+    fn eq(&self, other: &Url) -> bool {
+        self.as_str() == other.as_str()
     }
 }

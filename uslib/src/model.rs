@@ -11,8 +11,10 @@ use chrono::Utc;
 use serde::Deserialize;
 use serde::Serialize;
 
+use serde_diff::SerdeDiff;
+
 /// A topic from a Moodle course.
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, SerdeDiff, Serialize)]
 pub struct Topic {
     pub name: String,
     pub assignements: Vec<Assignement>,
@@ -22,14 +24,14 @@ pub struct Topic {
 }
 
 /// A name and url container.
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, SerdeDiff, Serialize)]
 pub struct NameUrlContainer {
     pub name: String,
     pub url: types::Url,
 }
 
 /// An assignement.
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, SerdeDiff, Serialize)]
 pub struct Assignement(pub NameUrlContainer);
 
 impl Deref for Assignement {
@@ -46,7 +48,7 @@ impl DerefMut for Assignement {
 }
 
 /// A quiz.
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, SerdeDiff, Serialize)]
 pub struct Quiz(pub NameUrlContainer);
 
 impl Deref for Quiz {
@@ -63,7 +65,7 @@ impl DerefMut for Quiz {
 }
 
 /// An url.
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, SerdeDiff, Serialize)]
 pub struct Url(pub NameUrlContainer);
 
 impl Deref for Url {
@@ -80,7 +82,7 @@ impl DerefMut for Url {
 }
 
 /// A resource.
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, SerdeDiff, Serialize)]
 pub struct Resource {
     #[serde(flatten)]
     pub ident: NameUrlContainer,
@@ -101,17 +103,18 @@ impl DerefMut for Resource {
     }
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, SerdeDiff, Serialize)]
 pub struct ResourceContent {
     #[serde(rename = "type")]
     content_type: ContentType,
     name: String,
     url: types::Url,
     #[serde(with = "chrono::serde::ts_seconds")]
+    #[serde_diff(opaque)]
     mtime: DateTime<Utc>,
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, SerdeDiff, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum ContentType {
     File,

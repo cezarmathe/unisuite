@@ -6,7 +6,7 @@ use std::ops::Deref;
 use std::ops::DerefMut;
 
 use chrono::DateTime;
-use chrono::Local;
+use chrono::Utc;
 
 use serde::Deserialize;
 use serde::Serialize;
@@ -107,7 +107,8 @@ pub struct ResourceContent {
     content_type: ContentType,
     name: String,
     url: types::Url,
-    mtime: DateTime<Local>,
+    #[serde(with = "chrono::serde::ts_seconds")]
+    mtime: DateTime<Utc>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]

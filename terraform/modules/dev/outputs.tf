@@ -11,3 +11,7 @@ output "watchman_image_id" {
 output "asbot_image_id" {
   value = var.use_module ? local.asbot_image_id : ""
 }
+
+output "usdiff_image_id" {
+  value = var.use_module ? local.usdiff_image_id : ""
+}

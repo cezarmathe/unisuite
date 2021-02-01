@@ -113,3 +113,22 @@ resource "docker_container" "asbot" {
   restart  = "unless-stopped"
   start    = true
 }
+
+resource "docker_container" "usdiff" {
+  name  = "usdiff"
+  image = local.usdiff_image
+
+  env = [
+    "SYSLOG=${docker_container.syslog.network_data[0].ip_address}:514",
+    "LOG_LEVEL=${var.usdiff_log_level != "" ? var.usdiff_log_level : var.log_level}",
+    "USDIFF_ADDRESS=http://0.0.0.0:${random_integer.usdiff_grpc_port.result}",
+  ]
+
+  networks_advanced {
+    name = docker_network.syslog.name
+  }
+
+  must_run = true
+  restart  = "unless-stopped"
+  start    = true
+}

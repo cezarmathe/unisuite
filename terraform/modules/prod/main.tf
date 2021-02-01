@@ -46,3 +46,14 @@ resource "docker_image" "asbot" {
   name          = data.docker_registry_image.asbot[0].name
   pull_triggers = [data.docker_registry_image.asbot[0].sha256_digest]
 }
+
+data "docker_registry_image" "usdiff" {
+  count = var.use_module ? 1 : 0
+  name  = "cezarmathe/usdiff:${var.usdiff_image_version}"
+}
+
+resource "docker_image" "usdiff" {
+  count         = var.use_module ? 1 : 0
+  name          = data.docker_registry_image.usdiff[0].name
+  pull_triggers = [data.docker_registry_image.usdiff[0].sha256_digest]
+}

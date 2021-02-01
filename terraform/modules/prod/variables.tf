@@ -26,3 +26,8 @@ variable "asbot_image_version" {
   type        = string
   description = "Adam Smith bot version to use for deployment."
 }
+
+variable "usdiff_image_version" {
+  type        = string
+  description = "Usdiff version to use for deployment."
+}

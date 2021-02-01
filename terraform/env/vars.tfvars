@@ -32,3 +32,7 @@ asbot_log_level     = ""
 asbot_discord_token         = ""
 asbot_mevents_webhook_id    = ""
 asbot_mevents_webhook_token = ""
+
+# usdiff
+usdiff_image_version = ""
+usdiff_log_level     = ""

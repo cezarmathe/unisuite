@@ -4,6 +4,7 @@ set -e
 
 ARTIFACTS=(
     asbot
+    usdiff
     usscraper
     watchman
 )

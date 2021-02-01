@@ -106,3 +106,15 @@ variable "asbot_mevents_webhook_token" {
   type        = string
   description = "Adam Smith mevents webhook token."
 }
+
+variable "usdiff_image_version" {
+  type        = string
+  description = "Usdiff version to use for deployment."
+  default     = ""
+}
+
+variable "usdiff_log_level" {
+  type        = string
+  description = "Usdiff log level."
+  default     = ""
+}

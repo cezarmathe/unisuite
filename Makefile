@@ -1,6 +1,6 @@
 # unisuite makefile
 
-COMPONENTS = scraper watchman
+COMPONENTS = scraper usdiff watchman
 
 # Cargo command to use for building.
 # You can use either cargo or cross.

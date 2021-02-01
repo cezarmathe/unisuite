@@ -11,3 +11,7 @@ output "watchman_image_id" {
 output "asbot_image_id" {
   value = var.use_module ? docker_image.asbot[0].latest : ""
 }
+
+output "usdiff_image_id" {
+  value = var.use_module ? docker_image.usdiff[0].latest : ""
+}

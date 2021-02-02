@@ -1,0 +1,40 @@
+// scraper - scraper service stuff.
+
+syntax = "proto3";
+
+package com.cezarmathe.unisuite;
+
+// A scrape rule.
+message ScrapeRule {
+    string              name            = 1;
+    string              function_name   = 2;
+    map<string, string> function_params = 3;
+    string              jq_filter       = 4;
+}
+
+// Run a scrape.
+message RunScrapeRequest {
+    repeated string     existing_rule_names = 1;
+    repeated ScrapeRule new_rules           = 2;
+}
+
+message RunScrapeResult {
+    oneof out {
+        string ok  = 1;
+        string err = 2;
+    }
+}
+
+// Run a scrape results.
+message RunScrapeResponse {
+    map<string, RunScrapeResult> results = 1;
+}
+
+// Scrape runner service.
+service ScrapeRunner {
+    // rpc RunScrape(RunScrapeRequest) returns (RunScrapeResponse);
+    // rpc AddScrapeRule(RunScrapeRequest) returns (RunScrapeRequest);
+    // rpc UpdateScrapeRule(RunScrapeRequest) returns (RunScrapeRequest);
+    // rpc DeleteScrapeRule(RunScrapeRequest) returns (RunScrapeRequest);
+    // rpc SetDefaultInterval(RunScrapeRequest) returns (RunScrapeRequest);
+}

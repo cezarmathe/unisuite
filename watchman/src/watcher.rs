@@ -30,12 +30,18 @@ pub struct ScraperRule {
 impl ScraperRule {
     /// Create a new ScraperRule.
     pub fn new(name: String) -> Self {
-        Self { name, content: None }
+        Self {
+            name,
+            content: None,
+        }
     }
 
     /// Create a new ScraperRule with content.
     pub fn new_with_content(name: String, content: Vec<Topic>) -> Self {
-        Self { name, content: Some(content) }
+        Self {
+            name,
+            content: Some(content),
+        }
     }
 }
 
@@ -110,7 +116,10 @@ impl TryFrom<&Path> for ScraperRule {
             content
         );
 
-        Ok(ScraperRule::new_with_content(components[3].to_string(), content))
+        Ok(ScraperRule::new_with_content(
+            components[3].to_string(),
+            content,
+        ))
     }
 }
 

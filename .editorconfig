@@ -22,3 +22,6 @@ indent_size = 2
 
 [Vagrantfile]
 indent_size = 2
+
+[*.proto]
+indent_size = 2

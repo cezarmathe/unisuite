@@ -1,40 +1,158 @@
-// scraper - scraper service stuff.
-
+/**
+ * Scraper family of interface definitions.
+ */
 syntax = "proto3";
 
 package com.cezarmathe.unisuite;
 
-// A scrape rule.
+/**
+ * A scrape rule used for gathering information from Moodle.
+ */
 message ScrapeRule {
-    string              name            = 1;
-    string              function_name   = 2;
-    map<string, string> function_params = 3;
-    string              jq_filter       = 4;
+  /**
+   * Name of the scrape.
+   */
+  string              name            = 1;
+  /**
+   * Moodle API function to be used.
+   */
+  string              function_name   = 2;
+  /**
+   * Params for the Moodle API function to be used.
+   */
+  map<string, string> function_params = 3;
+  /**
+   * Jq filter used for processing a successful API call result.
+   */
+  string              jq_filter       = 4;
+  /**
+   * Optional cron spec for scheduling this scrape. If not specified, the
+   * default cron spec will be used.
+   */
+  string              cron_spec       = 5;
 }
 
-// Run a scrape.
-message RunScrapeRequest {
-    repeated string     existing_rule_names = 1;
-    repeated ScrapeRule new_rules           = 2;
+/**
+ * Request used for getting scrape rules from
+ * ScrapeRunnerService::GetScraoeRules.
+ */
+message GetScrapeRulesRequest {
+  /**
+   * A list of rule names to retrieve.
+   *
+   * An empty list will return all scrape rules.
+   */
+  repeated string rule_names = 1;
 }
 
-message RunScrapeResult {
-    oneof out {
-        string ok  = 1;
-        string err = 2;
-    }
+/**
+ * Response from ScrapeRunnerService::GetScrapeRules.
+ */
+message GetScrapeRulesResponse {
+  /**
+   * A map from scrape rule name to scrape rule contents.
+   */
+  map<string, ScrapeRule> rules = 1;
 }
 
-// Run a scrape results.
-message RunScrapeResponse {
-    map<string, RunScrapeResult> results = 1;
+/**
+ * ScrapeRunnerService provides access to the component that runs the scraper.
+ */
+service ScrapeRunnerService {
+  rpc GetScrapeRules(GetScrapeRulesRequest) returns (GetScrapeRulesResponse);
 }
 
-// Scrape runner service.
-service ScrapeRunner {
-    // rpc RunScrape(RunScrapeRequest) returns (RunScrapeResponse);
-    // rpc AddScrapeRule(RunScrapeRequest) returns (RunScrapeRequest);
-    // rpc UpdateScrapeRule(RunScrapeRequest) returns (RunScrapeRequest);
-    // rpc DeleteScrapeRule(RunScrapeRequest) returns (RunScrapeRequest);
-    // rpc SetDefaultInterval(RunScrapeRequest) returns (RunScrapeRequest);
+/**
+ * Request used for getting scrape data using
+ * ScrapeStoreService::GetScrapeDataRequest.
+ */
+ message GetScrapeDataRequest {
+  /**
+   * A list of rule names to retrieve the data for.
+   *
+   * An empty list will return all scrape data.
+   */
+  repeated string rule_names = 1;
+}
+
+/**
+ * Response from ScrapeRunnerService::GetScrapeData.
+ */
+message GetScrapeDataResponse {
+  /**
+   * A map from scrape rule name to scrape rule data.
+   */
+  map<string, bytes> rule_data = 1;
+}
+
+/**
+ * Request used for getting scrape shasums using
+ * ScrapeStoreService::GetScrapeSums.
+ */
+ message GetScrapeSumsRequest {
+  /**
+   * A list of rule names to retrieve the shasums for.
+   *
+   * An empty list will return all scrape shasums.
+   */
+  repeated string rule_names = 1;
+}
+
+/**
+ * Response from ScrapeRunnerService::GetScrapeSums.
+ */
+message GetScrapeSumsResponse {
+  /**
+   * A map from scrape rule name to scrape rule shasum.
+   */
+  map<string, bytes> rule_sums = 1;
+}
+
+/**
+ * ScrapeStoreService provides access to data scraped from Moodle.
+ */
+service ScrapeStoreService {
+  /**
+   * Get current scrape data.
+   */
+  rpc GetScrapeData(GetScrapeDataRequest) returns (GetScrapeDataResponse);
+
+  /**
+   * Get current scrape shasums.
+   */
+  rpc GetScrapeSums(GetScrapeSumsRequest) returns (GetScrapeSumsResponse);
+}
+
+/**
+ * Request used for getting scrape shasums using
+ * ScrapeNewsletterService::Subscribe.
+ */
+ message SubscribeRequest {
+  /**
+   * A list of rule names to subscribe to.
+   *
+   * An empty list will subscribe to all rules.
+   */
+  repeated string rule_names = 1;
+}
+
+/**
+ * Response from ScrapeNewsletterService::Subscribe.
+ */
+message SubscribeResponse {
+  /**
+   * The name of the rule that has updated.
+   */
+  string rule_name = 1;
+}
+
+/**
+ * ScrapeNewsletterService provides a mechanism for subscribing to rule
+ * updates.
+ */
+service ScrapeNewsletterService {
+  /**
+   * Subscribe to updates.
+   */
+  rpc Subscribe(SubscribeRequest) returns (stream SubscribeResponse);
 }

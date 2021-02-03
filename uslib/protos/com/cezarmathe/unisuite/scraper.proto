@@ -1,43 +1,43 @@
-/**
+/*
  * Scraper family of interface definitions.
  */
 syntax = "proto3";
 
 package com.cezarmathe.unisuite;
 
-/**
+/*
  * A scrape rule used for gathering information from Moodle.
  */
 message ScrapeRule {
-  /**
+  /*
    * Name of the scrape.
    */
   string              name            = 1;
-  /**
+  /*
    * Moodle API function to be used.
    */
   string              function_name   = 2;
-  /**
+  /*
    * Params for the Moodle API function to be used.
    */
   map<string, string> function_params = 3;
-  /**
+  /*
    * Jq filter used for processing a successful API call result.
    */
   string              jq_filter       = 4;
-  /**
+  /*
    * Optional cron spec for scheduling this scrape. If not specified, the
    * default cron spec will be used.
    */
   string              cron_spec       = 5;
 }
 
-/**
+/*
  * Request used for getting scrape rules from
  * ScrapeRunnerService::GetScraoeRules.
  */
 message GetScrapeRulesRequest {
-  /**
+  /*
    * A list of rule names to retrieve.
    *
    * An empty list will return all scrape rules.
@@ -45,29 +45,29 @@ message GetScrapeRulesRequest {
   repeated string rule_names = 1;
 }
 
-/**
+/*
  * Response from ScrapeRunnerService::GetScrapeRules.
  */
 message GetScrapeRulesResponse {
-  /**
+  /*
    * A map from scrape rule name to scrape rule contents.
    */
   map<string, ScrapeRule> rules = 1;
 }
 
-/**
+/*
  * ScrapeRunnerService provides access to the component that runs the scraper.
  */
 service ScrapeRunnerService {
   rpc GetScrapeRules(GetScrapeRulesRequest) returns (GetScrapeRulesResponse);
 }
 
-/**
+/*
  * Request used for getting scrape data using
  * ScrapeStoreService::GetScrapeDataRequest.
  */
  message GetScrapeDataRequest {
-  /**
+  /*
    * A list of rule names to retrieve the data for.
    *
    * An empty list will return all scrape data.
@@ -75,22 +75,22 @@ service ScrapeRunnerService {
   repeated string rule_names = 1;
 }
 
-/**
+/*
  * Response from ScrapeRunnerService::GetScrapeData.
  */
 message GetScrapeDataResponse {
-  /**
+  /*
    * A map from scrape rule name to scrape rule data.
    */
   map<string, bytes> rule_data = 1;
 }
 
-/**
+/*
  * Request used for getting scrape shasums using
  * ScrapeStoreService::GetScrapeSums.
  */
  message GetScrapeSumsRequest {
-  /**
+  /*
    * A list of rule names to retrieve the shasums for.
    *
    * An empty list will return all scrape shasums.
@@ -98,37 +98,37 @@ message GetScrapeDataResponse {
   repeated string rule_names = 1;
 }
 
-/**
+/*
  * Response from ScrapeRunnerService::GetScrapeSums.
  */
 message GetScrapeSumsResponse {
-  /**
+  /*
    * A map from scrape rule name to scrape rule shasum.
    */
   map<string, bytes> rule_sums = 1;
 }
 
-/**
+/*
  * ScrapeStoreService provides access to data scraped from Moodle.
  */
 service ScrapeStoreService {
-  /**
+  /*
    * Get current scrape data.
    */
   rpc GetScrapeData(GetScrapeDataRequest) returns (GetScrapeDataResponse);
 
-  /**
+  /*
    * Get current scrape shasums.
    */
   rpc GetScrapeSums(GetScrapeSumsRequest) returns (GetScrapeSumsResponse);
 }
 
-/**
+/*
  * Request used for getting scrape shasums using
  * ScrapeNewsletterService::Subscribe.
  */
  message SubscribeRequest {
-  /**
+  /*
    * A list of rule names to subscribe to.
    *
    * An empty list will subscribe to all rules.
@@ -136,22 +136,22 @@ service ScrapeStoreService {
   repeated string rule_names = 1;
 }
 
-/**
+/*
  * Response from ScrapeNewsletterService::Subscribe.
  */
 message SubscribeResponse {
-  /**
+  /*
    * The name of the rule that has updated.
    */
   string rule_name = 1;
 }
 
-/**
+/*
  * ScrapeNewsletterService provides a mechanism for subscribing to rule
  * updates.
  */
 service ScrapeNewsletterService {
-  /**
+  /*
    * Subscribe to updates.
    */
   rpc Subscribe(SubscribeRequest) returns (stream SubscribeResponse);

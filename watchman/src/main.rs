@@ -1,6 +1,8 @@
 //! Watchman
 
 mod asbot_client;
+mod server;
+mod services;
 mod watcher;
 
 use uslib::common::*;

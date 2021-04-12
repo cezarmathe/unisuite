@@ -19,7 +19,7 @@ url         = "2.2.0"
 
 [dependencies.blockz]
 git      = "https://github.com/selftechio/blockz.git"
-tag      = "0.1.0"
+tag      = "0.2.2"
 features = ["no_absolute_paths"]
 
 [dependencies.chrono]
